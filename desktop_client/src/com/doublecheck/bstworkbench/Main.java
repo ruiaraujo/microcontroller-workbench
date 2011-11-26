@@ -1,11 +1,11 @@
 package com.doublecheck.bstworkbench;
 
+import java.awt.Dimension;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
-import com.doublecheck.bstworkbench.ui.TextComponentDemo;
+import com.doublecheck.bstworkbench.ui.Editor;
 
 public final class Main {
 
@@ -16,11 +16,11 @@ public final class Main {
      */
     private static void createAndShowGUI() {
         //Create and set up the window.
-        final TextComponentDemo frame = new TextComponentDemo();
+        final Editor frame = new Editor();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Display the window.
-        frame.pack();
+        frame.setSize(new Dimension(600,600));
         frame.setVisible(true);
     }
 

@@ -1,5 +1,4 @@
 package com.doublecheck.bstworkbench.ui;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -12,12 +11,13 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 
+@SuppressWarnings("serial")
 public class LineNumbers extends JPanel {
 	// for this simple experiment, we keep the pane + scrollpane as members.
 	JTextPane pane;
 	JScrollPane scrollPane;
 	JFrame parent;
-	@SuppressWarnings("serial")
+
 	public LineNumbers(JScrollPane scrollPane , JTextPane pane) {
 		super();
 		setMinimumSize(new Dimension(10, 30));
