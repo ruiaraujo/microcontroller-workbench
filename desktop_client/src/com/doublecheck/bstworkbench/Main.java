@@ -17,7 +17,6 @@ public final class Main {
     private static void createAndShowGUI() {
         //Create and set up the window.
         final Editor frame = new Editor();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Display the window.
         frame.setSize(new Dimension(600,600));
