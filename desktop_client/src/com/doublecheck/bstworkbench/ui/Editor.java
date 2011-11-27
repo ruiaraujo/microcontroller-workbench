@@ -11,6 +11,7 @@ import javax.swing.text.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
 
+import com.doublecheck.bstworkbench.compiler.parser.Parser;
 import com.doublecheck.bstworkbench.io.IOUtil;
 
 @SuppressWarnings("serial")
@@ -385,7 +386,24 @@ public class Editor extends JFrame {
         }
 
         public void actionPerformed(ActionEvent e) {
+            if ( textPane.getText().trim().length() == 0 )
+            {
+                changeLog.append("There is nothing to compile\n");
+                return;
+            }
+            Parser parser = new Parser();
+            if ( changeLog.getText().length() != 0 )//get some space
+                changeLog.append("\n\n\n");
             changeLog.append("Compiling\n");
+            parser.parse(textPane.getText());
+            if ( parser.detectedErrors() )
+            {
+                for ( String s : parser.getListErrors() )
+                    changeLog.append(s+'\n');
+                changeLog.append("Found erros while compiling\n");
+            }
+            else
+                changeLog.append("Compiled successfully\n");
         }
 
     }
