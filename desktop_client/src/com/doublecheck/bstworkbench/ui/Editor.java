@@ -3,7 +3,6 @@ package com.doublecheck.bstworkbench.ui;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 
 import javax.swing.*;

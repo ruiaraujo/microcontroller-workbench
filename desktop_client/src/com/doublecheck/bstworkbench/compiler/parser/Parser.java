@@ -25,75 +25,105 @@ public class Parser {
             
     }
     private void parseLine(String line , int lineNumber){
-        final StringTokenizer tok = new StringTokenizer(line, " \t");
-        final String firstTok = tok.nextToken().trim();
-        if ( SupportedOperations.SELTAP.equalsIgnoreCase(firstTok) )
+        final String[] tokens = tokenizer(new StringTokenizer(line, " \t"));
+     
+        //Parsing SETAP
+        if ( SupportedOperations.SELTAP.equalsIgnoreCase(tokens[0]) )
         {
-            if ( tok.hasMoreTokens() )
+            if ( tokens.length >= 2  )
             {
-                String num = tok.nextToken().trim();
+                String num = tokens[1];
                 try{
                     Integer.parseInt(num);
                 } catch(Exception e){
-                    addError(lineNumber,"Error parsing " + firstTok + " argument: " + num);
+                    addError(lineNumber,"Error parsing " + tokens[0] + " argument: " + num);
                     return;
                 }
-                parseLineTrash(tok, lineNumber, num);
+                //parseLineTrash(, lineNumber, num);
                 return;
             }
             else
             {
-                addError(lineNumber,"Expected numeric argument after parsing " + firstTok);
+                addError(lineNumber,"Expected numeric argument after parsing " + tokens[0]);
                 return;
             }
             
         }
-        if ( SupportedOperations.TMS.equalsIgnoreCase(firstTok) )
+        //Parsing TMS
+        if ( SupportedOperations.TMS.equalsIgnoreCase(tokens[0]) )
         {
-            if ( tok.hasMoreTokens() )
+            if ( tokens.length >= 1 )
             {
-                String num = tok.nextToken().trim();
+                String num = tokens[1].trim();
                 try{
                     Integer.parseInt(num);
                 } catch(Exception e){
-                    addError(lineNumber,"Error parsing " + firstTok + " argument: " + num);
+                    addError(lineNumber,"Error parsing " + tokens[0] + " argument: " + num);
                     return;
                 }
-                parseLineTrash(tok, lineNumber, num);
+                //parseLineTrash(tok, lineNumber, num);
                 return;
             }
             else
             {
-                addError(lineNumber,"Expected numeric argument after parsing " + firstTok);
+                addError(lineNumber,"Expected numeric argument after parsing " + tokens[0]);
                 return;
             }
             
         }
-        if ( SupportedOperations.STATE.equalsIgnoreCase(firstTok) )
+        //PARSING STATE
+        if ( SupportedOperations.STATE.equalsIgnoreCase(tokens[0]) )
         {
-            if ( tok.hasMoreTokens() )
+            if (  tokens.length >= 1 )
             {
-                String state = tok.nextToken().trim();
-                parseLineTrash(tok, lineNumber, state);
+               // String state = tok.nextToken().trim();
+               // parseLineTrash(tok, lineNumber, state);
                 return;
             }
             else
             {
-                addError(lineNumber,"Expected numeric argument after parsing " + firstTok);
+                addError(lineNumber,"Expected argument after parsing " + tokens[0]);
                 return;
             }
             
         }
-        addError(lineNumber,"Unknown identifier: " + firstTok);
+        //PARSING SDR or SIR 
+        if ( SupportedOperations.SDR.equalsIgnoreCase(tokens[0]) || 
+        		SupportedOperations.SIR.equalsIgnoreCase(tokens[0]) )
+        {
+            if ( tokens.length >= 1 )
+            {
+               // String state = tok.nextToken().trim();
+                //parseLineTrash(tok, lineNumber, state);
+                return;
+            }
+            else
+            {
+                addError(lineNumber,"Expected  argument after parsing " + tokens[0]);
+                return;
+            }
+            
+        }
+
+        addError(lineNumber,"Unknown identifier: " + tokens[0]);
         return;
 
+    }
+    
+    private String [] tokenizer(StringTokenizer tok){
+    	if ( tok == null )
+    		return null;
+    	final String [] tokens = new String[tok.countTokens()];
+    	for ( int i = 0 ; i < tokens.length ; ++i  )
+    		tokens[i] = tok.nextToken();
+    	return tokens;
     }
     
     public boolean detectedErrors() {
         return !errors.isEmpty();
     }
     
-    private void parseLineTrash( final StringTokenizer tok , final int lineNumber,
+  /*  private void parseLineTrash( final StringTokenizer tok , final int lineNumber,
             final String lastTok){
         if ( tok.hasMoreTokens() )
         {
@@ -103,7 +133,7 @@ public class Parser {
             addError(lineNumber,"Unexpected tokens after parsing " +lastTok +
                         " :\n"+extra);
         }
-    }
+    }*/
     
     private void addError(int line , String error){
         errors.add(new Error(line, error));

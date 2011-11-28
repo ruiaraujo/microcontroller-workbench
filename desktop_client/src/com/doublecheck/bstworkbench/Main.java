@@ -2,7 +2,6 @@ package com.doublecheck.bstworkbench;
 
 import java.awt.Dimension;
 
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import com.doublecheck.bstworkbench.ui.Editor;
