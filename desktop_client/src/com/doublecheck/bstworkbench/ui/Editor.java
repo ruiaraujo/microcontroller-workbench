@@ -1,16 +1,55 @@
 package com.doublecheck.bstworkbench.ui;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
-import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
-import javax.swing.undo.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.GroupLayout;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.JTextComponent;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 
+
+import com.doublecheck.bstworkbench.compiler.commands.Command;
 import com.doublecheck.bstworkbench.compiler.parser.Parser;
+import com.doublecheck.bstworkbench.compiler.parser.SupportedOperations;
 import com.doublecheck.bstworkbench.io.IOUtil;
 
 @SuppressWarnings("serial")
@@ -150,6 +189,7 @@ public class Editor extends JFrame {
         textPane.getStyledDocument().addUndoableEditListener(
                 new MyUndoableEditListener());
         textPane.addCaretListener(caretListenerLabel);
+        textPane.getStyledDocument().addDocumentListener(new AutoCompleteListener());
         
     }
 
@@ -229,6 +269,11 @@ public class Editor extends JFrame {
         // Alt-c to compile
         key = KeyStroke.getKeyStroke(KeyEvent.VK_C, Event.ALT_MASK);
         inputMap.put(key, compileAction);
+        
+        inputMap.put(KeyStroke.getKeyStroke("ENTER"), COMMIT_ACTION);
+        textPane.getActionMap().put(COMMIT_ACTION, new CommitAction());
+        
+        
 
     }
 
@@ -402,7 +447,11 @@ public class Editor extends JFrame {
                 changeLog.append("Found erros while compiling\n");
             }
             else
+            {
                 changeLog.append("Compiled successfully\n");
+                for ( Command s : parser.getCommands() )
+                    changeLog.append(s.toString()+'\n');
+            }
         }
 
     }
@@ -499,6 +548,93 @@ public class Editor extends JFrame {
                 redoAction.updateRedoState();
                 undoAction.updateUndoState();
                 edited = false;
+        }
+    }
+    
+   
+    // Auto completion support
+    private class AutoCompleteListener implements DocumentListener{
+        public void changedUpdate(DocumentEvent ev) {
+        }
+         
+        public void removeUpdate(DocumentEvent ev) {
+        }
+         
+        public void insertUpdate(DocumentEvent ev) {
+            if (ev.getLength() != 1) {
+                return;
+            }
+             
+            int pos = ev.getOffset();
+            String content = null;
+            try {
+                content = textPane.getText(0, pos + 1);
+            } catch (BadLocationException e) {
+                e.printStackTrace();
+            }
+             
+            // Find where the word starts
+            int w;
+            for (w = pos; w >= 0; w--) {
+                if (! Character.isLetter(content.charAt(w))) {
+                    break;
+                }
+            }
+            if (pos - w < 1) {
+                // Too few chars
+                return;
+            }
+             
+            String prefix = content.substring(w + 1).toLowerCase();
+            List<String> words = SupportedOperations.getSupportedOperations();
+            int n = Collections.binarySearch(words, prefix);
+            if (n < 0 && -n <= words.size()) {
+                String match = words.get(-n - 1);
+                if (match.startsWith(prefix)) {
+                    // A completion is found
+                    String completion = match.substring(pos - w);
+                    // We cannot modify Document from within notification,
+                    // so we submit a task that does the change later
+                    SwingUtilities.invokeLater(
+                            new CompletionTask(completion, pos + 1));
+                }
+            } else {
+                // Nothing found
+                mode = Mode.INSERT;
+            }
+        }
+    }
+    private static final String COMMIT_ACTION = "commit";
+    private static enum Mode { INSERT, COMPLETION };
+    private Mode mode = Mode.INSERT;
+    private class CompletionTask implements Runnable {
+        String completion;
+        int position;
+         
+        CompletionTask(String completion, int position) {
+            this.completion = completion;
+            this.position = position;
+        }
+         
+        public void run() {
+            textPane.replaceSelection(completion);//, position);
+            textPane.setCaretPosition(position + completion.length());
+            textPane.moveCaretPosition(position);
+            mode = Mode.COMPLETION;
+        }
+    }
+     
+    private class CommitAction extends AbstractAction {
+        public void actionPerformed(ActionEvent ev) {
+            if (mode == Mode.COMPLETION) {
+                int pos = textPane.getSelectionEnd();
+                textPane.setCaretPosition(pos);
+                textPane.replaceSelection(" ");
+                textPane.setCaretPosition(pos + 1);
+                mode = Mode.INSERT;
+            } else {
+                textPane.replaceSelection("\n");
+            }
         }
     }
 }
