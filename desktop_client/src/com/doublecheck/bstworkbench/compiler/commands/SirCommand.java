@@ -13,13 +13,15 @@ public class SirCommand extends Command {
     protected final static String TDO = "tdo";
     protected final static String MASK = "mask";
     
+    protected final byte numberBytes;
     protected final Long tdi;
     protected final Long tdo;
     protected final Long mask;
     
     
-    public SirCommand(final Long tdi, final Long tdo, final Long mask) {
+    public SirCommand(final byte numberBytes , final Long tdi, final Long tdo, final Long mask) {
         super(sirIdentifier);
+        this.numberBytes = numberBytes;
         this.tdi = tdi;
         this.tdo = tdo;
         this.mask = mask;
@@ -49,11 +51,27 @@ public class SirCommand extends Command {
     public static SirCommand parse(String line) throws ParserException{
         if ( line == null )
             return null;
-        final StringTokenizer tok = new StringTokenizer(line.toLowerCase().trim(), " \t");
+        final StringTokenizer tok = new StringTokenizer(line.toLowerCase().trim(), " ()\t", true);
+        byte numberBytes = 0;
         Long tdi = null;
         Long tdo = null;
         Long mask = null;
-        String token = tok.nextToken(); // the first token is the command
+        String token = null; 
+        do{
+            token = tok.nextToken().trim();
+        } while( token.length() == 0 );// the first token is the command
+        
+        do{
+            token = tok.nextToken().trim();
+        } while( token.length() == 0 );
+        
+        try{
+            numberBytes = Byte.parseByte(token);
+        } 
+        catch ( NumberFormatException e ) 
+        {
+            throw new ParserException("Error parsing the numeric argument (" + token +") after SIR.");
+        }
         
         //Checking for TDI
         try{
@@ -80,7 +98,7 @@ public class SirCommand extends Command {
         } 
         catch ( NoSuchElementException e ) 
         {
-            return new SirCommand(tdi, tdo, mask);
+            return new SirCommand(numberBytes,tdi, tdo, mask);
         }  
         
         //Checking for MASK
@@ -94,8 +112,14 @@ public class SirCommand extends Command {
         } 
         catch ( NoSuchElementException e ) 
         {
-            mask = Long.MAX_VALUE;
-            return new SirCommand(tdi, tdo, mask);
+            byte numberFFs = (byte) (numberBytes/4);
+            if ( numberFFs*4 < numberBytes )
+                numberFFs++;
+            StringBuilder maskStr = new StringBuilder();
+            for ( byte i = 0; i <numberFFs; ++i   )
+                maskStr.append('F');
+            mask = Long.parseLong(maskStr.toString(),16);
+            return new SirCommand(numberBytes,tdi, tdo, mask);
         }  
         
         if ( tok.hasMoreTokens() )
@@ -112,7 +136,7 @@ public class SirCommand extends Command {
             }
             throw new ParserException("Unexpected tokens after parsing MASK :\n"+extra);
         }
-        return new SirCommand(tdi, tdo, mask);        
+        return new SirCommand(numberBytes,tdi, tdo, mask);        
 
         
     }
