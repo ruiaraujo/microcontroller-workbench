@@ -200,18 +200,32 @@ public class Editor extends JFrame {
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
         final JButton compile = new JButton(compileAction);
+        
+        final JButton upload = new JButton("Upload"); 
         final JButton run = new JButton("Run");
-        final JButton step = new JButton("Step");
+        run.setEnabled(false);
+        final JButton step = new JButton("Step ");
+        step.setEnabled(false);
         final JButton stop = new JButton("Stop");
+        stop.setEnabled(false);
 
         compile.setAction(compileAction);
-        layout.setHorizontalGroup(layout.createParallelGroup(
-                GroupLayout.Alignment.LEADING).addComponent(compile)
-                .addComponent(run).addComponent(step).addComponent(stop));
-        layout.setVerticalGroup(layout.createSequentialGroup().addComponent(
-                compile).addGap(20).addComponent(run).addComponent(step)
-                .addComponent(stop));
-
+        layout.setHorizontalGroup(
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addComponent(compile)
+                    .addComponent(upload)
+                    .addComponent(run)
+                    .addComponent(step)
+                    .addComponent(stop));
+        layout.setVerticalGroup(layout.createSequentialGroup()
+                    .addComponent(compile)
+                    .addComponent(upload)
+                    .addGap(20).addGap(20)
+                    .addComponent(run)
+                    .addComponent(step)
+                    .addComponent(stop));
+        
+        layout.linkSize(SwingConstants.HORIZONTAL, compile, upload);
         layout.linkSize(SwingConstants.HORIZONTAL, compile, run);
         layout.linkSize(SwingConstants.HORIZONTAL, compile, step);
         layout.linkSize(SwingConstants.HORIZONTAL, compile, stop);
