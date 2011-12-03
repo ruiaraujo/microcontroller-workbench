@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.doublecheck.bstworkbench.compiler.commands.Command;
+import com.doublecheck.bstworkbench.compiler.commands.SdrCommand;
 import com.doublecheck.bstworkbench.compiler.commands.SeltapCommand;
+import com.doublecheck.bstworkbench.compiler.commands.SirCommand;
 import com.doublecheck.bstworkbench.compiler.commands.StateCommand;
 import com.doublecheck.bstworkbench.compiler.commands.TmsCommand;
 
@@ -17,16 +19,21 @@ public final class SupportedOperations {
     private static List<String> supportedOperations = null;
     
     public static Command parseLine( String line ) throws ParserException{
-        if ( line.toLowerCase().startsWith(TMS+" ") )
+        if ( line.toLowerCase().equals(TMS) ||
+            line.toLowerCase().startsWith(TMS+" ") ) 
             return TmsCommand.parse(line);
-        if ( line.toLowerCase().startsWith(SELTAP+" ") )
+        if ( line.toLowerCase().equals(SELTAP) ||
+                line.toLowerCase().startsWith(SELTAP+" ") )
             return SeltapCommand.parse(line);
-        if ( line.toLowerCase().startsWith(STATE+" ") )
+        if ( line.toLowerCase().equals(STATE) ||
+                line.toLowerCase().startsWith(STATE+" ") )
             return StateCommand.parse(line);
-        if ( line.toLowerCase().startsWith(SIR+" ") )
-            return TmsCommand.parse(line);
-        if ( line.toLowerCase().startsWith(SDR+" ") )
-            return TmsCommand.parse(line);
+        if ( line.toLowerCase().equals(SIR) ||
+                line.toLowerCase().startsWith(SIR+" ") )
+            return SirCommand.parse(line);
+        if ( line.toLowerCase().equals(SDR) ||
+                line.toLowerCase().startsWith(SDR+" ") )
+            return SdrCommand.parse(line);
         return null;
         
     }
@@ -35,6 +42,7 @@ public final class SupportedOperations {
         if ( supportedOperations == null )
         {
             supportedOperations = new ArrayList<String>();
+            //They should be added in alphabetical order!
             supportedOperations.add(SDR);
             supportedOperations.add(SELTAP);
             supportedOperations.add(SIR);
