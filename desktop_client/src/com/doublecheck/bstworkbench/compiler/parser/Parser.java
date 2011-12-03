@@ -15,7 +15,7 @@ public class Parser {
     }
     
     public void parse(String text){
-        final  StringTokenizer tok = new StringTokenizer(text.toLowerCase(), "\n\r", true);
+        final  StringTokenizer tok = new StringTokenizer(text.toLowerCase(), "\n", true);
         int line = 1;
         errors.clear();
         while ( tok.hasMoreTokens() )
@@ -23,8 +23,9 @@ public class Parser {
             String token = tok.nextToken().trim();
             if ( token.length() != 0 )
             {
-                                //parseLine(token, line);
                 try {
+                    if ( tok.hasMoreTokens() )
+                    tok.nextToken();//clean the '\n' that comes after each line
                     Command  com = SupportedOperations.parseLine(token);
                     if ( com != null )
                         commands.add(com);
