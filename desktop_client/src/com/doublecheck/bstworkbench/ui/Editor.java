@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -34,6 +35,12 @@ import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 
 
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.BasicCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.LanguageAwareCompletionProvider;
+import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -94,6 +101,12 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         URL url = getClass().getClassLoader().getResource("bookmark.png");
         gutter.setBookmarkIcon(new ImageIcon(url));
 
+        
+        // Install auto-completion onto our text area.
+        AutoCompletion ac = new AutoCompletion(createCompletionProvider());
+        ac.setListCellRenderer(new CCellRenderer());
+        ac.setShowDescWindow(true);
+        ac.install(textArea);
        
 
         chooser = new JFileChooser(System.getProperty("user.dir")) {
@@ -167,6 +180,71 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         textArea.addCaretListener(caretListenerLabel);
         
     }
+    
+    
+    /**
+     * Returns the provider to use when editing code.
+     *
+     * @return The provider.
+     * @see #createCommentCompletionProvider()
+     * @see #createStringCompletionProvider()
+     */
+    private CompletionProvider createCodeCompletionProvider() {
+
+        // Add completions for the C standard library.
+        DefaultCompletionProvider cp = new DefaultCompletionProvider();
+
+       // Add some handy shorthand completions.
+        cp.addCompletion(new ShorthandCompletion(cp, "sir 0 tdi(0)",
+                            "sir 0 tdi(0)"));
+        cp.addCompletion(new ShorthandCompletion(cp, "sir 0 tdi(0) tdo(0) mask(0)",
+                            "sir 0 tdi(0) tdo(0) mask(0)"));
+        return cp;
+
+    }
+
+
+    /**
+     * Returns the provider to use when in a comment.
+     *
+     * @return The provider.
+     * @see #createCodeCompletionProvider()
+     * @see #createStringCompletionProvider()
+     */
+    private CompletionProvider createCommentCompletionProvider() {
+        DefaultCompletionProvider cp = new DefaultCompletionProvider();
+        cp.addCompletion(new BasicCompletion(cp, "TODO:", "A to-do reminder"));
+        cp.addCompletion(new BasicCompletion(cp, "FIXME:", "A bug that needs to be fixed"));
+        return cp;
+    }
+
+
+    /**
+     * Creates the completion provider for a C editor.  This provider can be
+     * shared among multiple editors.
+     *
+     * @return The provider.
+     */
+    private CompletionProvider createCompletionProvider() {
+
+        // Create the provider used when typing code.
+        CompletionProvider codeCP = createCodeCompletionProvider();
+
+
+        // The provider used when typing a comment.
+        CompletionProvider commentCP = createCommentCompletionProvider();
+
+        // Create the "parent" completion provider.
+        LanguageAwareCompletionProvider provider = new
+                                LanguageAwareCompletionProvider(codeCP);
+        provider.setCommentCompletionProvider(commentCP);
+
+        return provider;
+
+    }
+
+    
+    
     
     /**
      * Creates the text area for this application.
@@ -274,12 +352,12 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         JMenu menu = new JMenu("File");
         menu.setMnemonic('F'); // set mnemonic to F
         
-        JMenuItem newFile = new JMenuItem("New File");
-        newFile.addActionListener(newFileAction);
+        JMenuItem newFile = new JMenuItem(newFileAction);
+        newFile.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         menu.add(newFile);
         
-        JMenuItem openFile = new JMenuItem("Open File");
-        openFile.addActionListener(openFileAction);
+        JMenuItem openFile = new JMenuItem(openFileAction);
         menu.add(openFile);
 
         menu.addSeparator();

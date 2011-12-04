@@ -30,7 +30,7 @@ public final class Main {
     	try {
 			UIManager.setLookAndFeel(
 			    UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
+		} catch (Exception e) { // Never happens
 			e.printStackTrace();
 		}
         SwingUtilities.invokeLater(new Runnable() {
