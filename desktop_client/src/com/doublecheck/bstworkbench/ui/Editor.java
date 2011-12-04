@@ -1,9 +1,7 @@
 package com.doublecheck.bstworkbench.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Event;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -32,7 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.event.UndoableEditEvent;
@@ -63,10 +59,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 
     // AbstractDocument doc;
 
-    JTextArea changeLog;
-    String newline = "\n";
-    HashMap<Object, Action> actions;
-
+    private JTextArea changeLog;
 
     // undo helpers
     protected RecordableTextAction undoAction;
