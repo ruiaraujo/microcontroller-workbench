@@ -1,0 +1,421 @@
+Index: src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java
+===================================================================
+--- src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java	(revision 350)
++++ src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java	(working copy)
+@@ -64,6 +64,12 @@
+ 	 * Style for highlighting BBCode.
+ 	 */
+ 	public static final String SYNTAX_STYLE_BBCODE			= "text/bbcode";
++	
++	
++    /**
++     * Style for highlighting BST Workbench code.
++     */
++    public static final String SYNTAX_STYLE_BST          = "text/bst";
+ 
+ 
+ 	/**
+Index: src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java
+===================================================================
+--- src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java	(revision 0)
++++ src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java	(revision 0)
+@@ -0,0 +1,355 @@
++/*
++ * 03/07/2004
++ *
++ * BstTokenMaker.java - Scanner for BST Workbench files.
++ * Copyright (C) 2011 Rui Araujo
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
++ */
++package org.fife.ui.rsyntaxtextarea.modes;
++
++import javax.swing.text.Segment;
++
++import org.fife.ui.rsyntaxtextarea.*;
++
++
++/**
++ * A token maker that turns text into a linked list of
++ * <code>Token</code>s for syntax highlighting BST Workbench language.
++ *
++ * @author Rui Araujo
++ * @version 0.1
++ */
++public class BstTokenMaker extends AbstractTokenMaker {
++
++	private int currentTokenStart;
++	private int currentTokenType;
++
++	/**
++	 * Constructor.
++	 */
++	public BstTokenMaker() {
++		super();	// Initializes tokensToHighlight.
++	}
++
++
++	/**
++	 * Checks the token to give it the exact ID it deserves before
++	 * being passed up to the super method.
++	 *
++	 * @param segment <code>Segment</code> to get text from.
++	 * @param start Start offset in <code>segment</code> of token.
++	 * @param end End offset in <code>segment</code> of token.
++	 * @param tokenType The token's type.
++	 * @param startOffset The offset in the document at which the token occurs.
++	 */
++	public void addToken(Segment segment, int start, int end, int tokenType, int startOffset) {
++
++		switch (tokenType) {
++			// Since reserved words, functions, and data types are all passed
++			// into here as "identifiers," we have to see what the token
++			// really is...
++			case Token.IDENTIFIER:
++				int value = wordsToHighlight.get(segment, start,end);
++				if (value!=-1)
++					tokenType = value;
++				break;
++		}
++
++		super.addToken(segment, start, end, tokenType, startOffset);
++
++	}
++
++
++	/**
++	 * Returns the text to place at the beginning and end of a
++	 * line to "comment" it in a this programming language.
++	 *
++	 * @return The start and end strings to add to a line to "comment"
++	 *         it out.
++	 */
++	public String[] getLineCommentStartAndEnd() {
++		return new String[] { "/*", "*/" };
++	}
++
++
++	/**
++	 * Returns whether tokens of the specified type should have "mark
++	 * occurrences" enabled for the current programming language.
++	 *
++	 * @param type The token type.
++	 * @return Whether tokens of this type should have "mark occurrences"
++	 *         enabled.
++	 */
++	public boolean getMarkOccurrencesOfTokenType(int type) {
++		return type==Token.IDENTIFIER || type==Token.VARIABLE;
++	}
++
++
++	/**
++	 * Returns the words to highlight for Bst files.
++	 *
++	 * @return A <code>TokenMap</code> containing the words to highlight for
++	 *         Bst batch files.
++	 * @see org.fife.ui.rsyntaxtextarea.AbstractTokenMaker#getWordsToHighlight
++	 */
++	public TokenMap getWordsToHighlight() {
++
++		TokenMap tokenMap = new TokenMap(true); // Ignore case.
++
++		int reservedWord = Token.RESERVED_WORD;
++		int argumentName = Token.VARIABLE;
++		tokenMap.put("sir",			reservedWord);
++		tokenMap.put("sdr",		    reservedWord);
++		tokenMap.put("seltap",		reservedWord);
++		tokenMap.put("tms",			reservedWord);
++		tokenMap.put("state",		reservedWord);
++		tokenMap.put("tdi",			argumentName);
++		tokenMap.put("tdo",			argumentName);
++		tokenMap.put("mask",		argumentName);
++
++		return tokenMap;
++
++	}
++
++
++	/**
++	 * Returns a list of tokens representing the given text.
++	 *
++	 * @param text The text to break into tokens.
++	 * @param startTokenType The token with which to start tokenizing.
++	 * @param startOffset The offset at which the line of tokens begins.
++	 * @return A linked list of tokens representing <code>text</code>.
++	 */
++	public Token getTokenList(Segment text, int startTokenType, final int startOffset) {
++
++		resetTokenList();
++
++		char[] array = text.array;
++		int offset = text.offset;
++		int count = text.count;
++		int end = offset + count;
++
++		// See, when we find a token, its starting position is always of the form:
++		// 'startOffset + (currentTokenStart-offset)'; but since startOffset and
++		// offset are constant, tokens' starting positions become:
++		// 'newStartOffset+currentTokenStart' for one less subtraction operation.
++		int newStartOffset = startOffset - offset;
++
++		currentTokenStart = offset;
++		currentTokenType  = startTokenType;
++
++//beginning:
++		for (int i=offset; i<end; i++) {
++
++			char c = array[i];
++
++			switch (currentTokenType) {
++
++				case Token.NULL:
++
++					currentTokenStart = i;	// Starting a new token here.
++
++					switch (c) {
++
++						case ' ':
++						case '\t':
++							currentTokenType = Token.WHITESPACE;
++							break;
++
++
++						// The "separators".
++						case '(':
++						case ')':
++							addToken(text, currentTokenStart,i, Token.SEPARATOR, newStartOffset+currentTokenStart);
++							currentTokenType = Token.NULL;
++							break;
++
++
++                     
++                            
++						default:
++
++                            if (RSyntaxUtilities.isHexCharacter(c)) {
++                                currentTokenType = Token.LITERAL_NUMBER_HEXADECIMAL;
++                                break;
++                            }
++							currentTokenType = Token.IDENTIFIER;
++							
++					} // End of switch (c).
++
++					break;
++
++				case Token.WHITESPACE:
++
++					switch (c) {
++
++						case ' ':
++						case '\t':
++							break;	// Still whitespace.
++
++
++						// The "separators".
++						case '(':
++						case ')':
++							addToken(text, currentTokenStart,i-1, Token.WHITESPACE, newStartOffset+currentTokenStart);
++							addToken(text, i,i, Token.SEPARATOR, newStartOffset+i);
++							currentTokenType = Token.NULL;
++							break;
++
++
++						default:	// Add the whitespace token and start anew.
++
++							addToken(text, currentTokenStart,i-1, Token.WHITESPACE, newStartOffset+currentTokenStart);
++							currentTokenStart = i;
++
++                            if (RSyntaxUtilities.isHexCharacter(c)) {
++                                currentTokenType = Token.LITERAL_NUMBER_HEXADECIMAL;
++                                break;
++                            }
++														
++							currentTokenType = Token.IDENTIFIER;
++							
++					} // End of switch (c).
++
++					break;
++					
++				case Token.LITERAL_NUMBER_HEXADECIMAL:
++
++                    switch (c) {
++
++                        case ' ':
++                        case '\t':
++                            addToken(text, currentTokenStart,i-1, Token.LITERAL_NUMBER_HEXADECIMAL, newStartOffset+currentTokenStart);
++                            currentTokenStart = i;
++                            currentTokenType = Token.WHITESPACE;
++                            break;
++        
++                            
++                       // The "separators".
++                       case '(':
++                       case ')':
++                           addToken(text, currentTokenStart,i-1, Token.LITERAL_NUMBER_HEXADECIMAL, newStartOffset+currentTokenStart);
++                           addToken(text, i,i, Token.SEPARATOR, newStartOffset+i);
++                           currentTokenType = Token.NULL;
++                           break;
++
++                        default:
++
++                            if (RSyntaxUtilities.isHexCharacter(c)) {
++                                break;  // Still a literal number.
++                            }
++                       
++                           // if not it's an identifier
++                            currentTokenType = Token.IDENTIFIER;
++
++                    } // End of switch (c).
++
++                    break;
++
++				default: // Should never happen
++				case Token.IDENTIFIER:
++
++					switch (c) {
++
++						case ' ':
++						case '\t':
++							// Check for single comments.
++							if (i-currentTokenStart==2 &&
++								(array[i-2]=='/' && array[i-1]=='/')) {
++									currentTokenType = Token.COMMENT_EOL;
++									break;
++							}
++							
++							addToken(text, currentTokenStart,i-1, Token.IDENTIFIER, newStartOffset+currentTokenStart);
++							currentTokenStart = i;
++							currentTokenType = Token.WHITESPACE;
++							break;
++						
++						// Should be part of identifiers, but not at end of "REM".
++                        case '*':
++                            // Check for REM comments.
++                            if (i-currentTokenStart==1 && array[i-1]=='/') {
++                                    currentTokenType = Token.COMMENT_MULTILINE;
++                            }
++                            break;
++
++
++						// Should be part of identifiers, but not at end of "REM".
++						case '/':
++                            if (i-currentTokenStart>=1 && array[i-1]=='/') {
++									currentTokenType = Token.COMMENT_EOL;
++							}
++							break;
++
++						// The "separators".
++						case '(':
++						case ')':
++							addToken(text, currentTokenStart,i-1, Token.IDENTIFIER, newStartOffset+currentTokenStart);
++							addToken(text, i,i, Token.SEPARATOR, newStartOffset+i);
++							currentTokenType = Token.NULL;
++							break;
++
++
++						default:
++
++						
++
++							// Otherwise, fall through and assume we're still okay as an IDENTIFIER...
++
++					} // End of switch (c).
++
++					break;
++
++				case Token.COMMENT_EOL:
++					i = end - 1;
++					addToken(text, currentTokenStart,i, Token.COMMENT_EOL, newStartOffset+currentTokenStart);
++					// We need to set token type to null so at the bottom we don't add one more token.
++					currentTokenType = Token.NULL;
++					break;
++					
++				case Token.COMMENT_MULTILINE:
++                    if (c == '/' ) {
++                            if (i-currentTokenStart>=1 && array[i-1]=='*') {
++                                    addToken(text, currentTokenStart,i, Token.COMMENT_MULTILINE, newStartOffset+currentTokenStart);
++                                    currentTokenType = Token.NULL;
++                            }
++                            break;
++                    }
++                    
++                    // We need to set token type to null so at the bottom we don't add one more token.
++                   // currentTokenType = Token.NULL;
++                    break;
++
++
++
++			} // End of switch (currentTokenType).
++
++		} // End of for (int i=offset; i<end; i++).
++
++		// Deal with the (possibly there) last token.
++		if (currentTokenType != Token.NULL) {
++				addToken(text, currentTokenStart,end-1, currentTokenType, newStartOffset+currentTokenStart);
++		}
++		if ( currentTokenType != Token.COMMENT_MULTILINE )
++		    addNullToken();
++
++		// Return the first token in our linked list.
++		return firstToken;
++
++	}
++
++
++}
+\ No newline at end of file
+
+Property changes on: src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java
+___________________________________________________________________
+Added: svn:mime-type
+   + text/plain
+
+Index: src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java
+===================================================================
+--- src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java	(revision 350)
++++ src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java	(working copy)
+@@ -56,6 +56,7 @@
+ 		map.put(SYNTAX_STYLE_ACTIONSCRIPT,		pkg + "ActionScriptTokenMaker");
+ 		map.put(SYNTAX_STYLE_ASSEMBLER_X86,		pkg + "AssemblerX86TokenMaker");
+ 		map.put(SYNTAX_STYLE_BBCODE,			pkg + "BBCodeTokenMaker");
++		map.put(SYNTAX_STYLE_BST,               pkg + "BstTokenMaker");
+ 		map.put(SYNTAX_STYLE_C,					pkg + "CTokenMaker");
+ 		map.put(SYNTAX_STYLE_CLOJURE,			pkg + "ClojureTokenMaker");
+ 		map.put(SYNTAX_STYLE_CPLUSPLUS,			pkg + "CPlusPlusTokenMaker");
+Index: src/org/fife/ui/rsyntaxtextarea/RSyntaxDocument.java
+===================================================================
+--- src/org/fife/ui/rsyntaxtextarea/RSyntaxDocument.java	(revision 350)
++++ src/org/fife/ui/rsyntaxtextarea/RSyntaxDocument.java	(working copy)
+@@ -349,7 +349,9 @@
+ 		return tokenMaker.getShouldIndentNextLineAfter(t);
+ 	}
+ 
+-
++	public int getLineCount(){
++	    return getDefaultRootElement().getElementCount();
++	}
+ 	/**
+ 	 * Returns a token list for the specified segment of text representing
+ 	 * the specified line number.  This method is basically a wrapper for
+@@ -620,6 +622,8 @@
+ 		}
+ 
+ 	}
++	
++	
+ 
+ 
+ }
+\ No newline at end of file
