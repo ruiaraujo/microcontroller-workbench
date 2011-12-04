@@ -40,10 +40,13 @@ public class Parser {
                     try {
                         Command  com = SupportedOperations.parseLine(tok);
                         if ( com != null )
+                        {  
+                            com.checkConsistency();
                             commands.add(com);
+                        }
                         else
                             addError(i+1,"Unknown identifier: " + new String(tok.text));
-                    } catch (ParserException e) {
+                    } catch (CompilerException e) {
                         addError(i+1,e.getMessage());
                     }
                     break;

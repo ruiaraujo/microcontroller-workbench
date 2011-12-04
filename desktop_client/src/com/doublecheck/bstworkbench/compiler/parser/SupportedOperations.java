@@ -20,7 +20,7 @@ public final class SupportedOperations {
     public final static String TMS = "tms";
     private static List<String> supportedOperations = null;
     
-    public static Command parseLine( Token tok ) throws ParserException{
+    public static Command parseLine( Token tok ) throws CompilerException{
         if ( tok.getLexeme().toLowerCase().equals(TMS) ) 
             return TmsCommand.parse(tok);
         if ( tok.getLexeme().toLowerCase().equals(SELTAP) )

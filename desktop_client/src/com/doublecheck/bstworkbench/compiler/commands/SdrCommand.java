@@ -2,7 +2,7 @@ package com.doublecheck.bstworkbench.compiler.commands;
 
 
 import org.fife.ui.rsyntaxtextarea.Token;
-import com.doublecheck.bstworkbench.compiler.parser.ParserException;
+import com.doublecheck.bstworkbench.compiler.parser.CompilerException;
 
 public class SdrCommand extends Command {
         
@@ -12,21 +12,21 @@ public class SdrCommand extends Command {
     protected final static String TDO = "tdo";
     protected final static String MASK = "mask";
 
-    protected final byte numberBytes;
+    protected final byte numberBits;
     protected final Long tdi;
     protected final Long tdo;
     protected final Long mask;
     
     
-    public SdrCommand(final byte numberBytes , final Long tdi, final Long tdo, final Long mask) {
-        this.numberBytes = numberBytes;
+    public SdrCommand(final byte numberBits , final Long tdi, final Long tdo, final Long mask) {
+        this.numberBits = numberBits;
         this.tdi = tdi;
         this.tdo = tdo;
         this.mask = mask;
     }
 
     public String toString(){
-        return toString(KEYWORD, numberBytes, tdi, tdo, mask);
+        return toString(KEYWORD, numberBits, tdi, tdo, mask);
     }
     
     protected static String toString( final String type , final byte numberBytes , final Long tdi, final Long tdo, final Long mask){
@@ -51,13 +51,13 @@ public class SdrCommand extends Command {
      * Parses a line 
      * @param line
      * @return
-     * @throws ParserException 
+     * @throws CompilerException 
      */
-    public static SdrCommand parse(Token tok) throws ParserException{
+    public static SdrCommand parse(Token tok) throws CompilerException{
        return SdrCommand.parseLine(tok, KEYWORD);        
     }
 
-    protected static SdrCommand parseLine(Token tok , final String type ) throws ParserException{
+    protected static SdrCommand parseLine(Token tok , final String type ) throws CompilerException{
         if ( tok == null )
             return null;
         byte numberBytes = 0;
@@ -67,29 +67,29 @@ public class SdrCommand extends Command {
         
         tok = tok.getNextToken(); // first should be a whitespace
         if ( tok == null || tok.type == Token.NULL )
-            throw new ParserException("Expected numeric argument after " + type + ".");
+            throw new CompilerException("Expected numeric argument after " + type + ".");
         
         try{
             tok = tok.getNextToken(); // byte count
             if ( tok == null || tok.type != Token.LITERAL_NUMBER_HEXADECIMAL )
-                throw new ParserException("Expected numeric argument after " + type + ".");
+                throw new CompilerException("Expected numeric argument after " + type + ".");
             numberBytes = Byte.parseByte(tok.getLexeme());
             mask = getMaximumNumber(numberBytes);
         } 
         catch ( NumberFormatException e ) 
         {
-            throw new ParserException("Error parsing the numeric argument (" + tok.getLexeme() +") after " + type + ".");
+            throw new CompilerException("Error parsing the numeric argument (" + tok.getLexeme() +") after " + type + ".");
         }
         
         tok = tok.getNextToken(); // should be a whitespace
         if ( tok == null || tok.type == Token.NULL )
-            throw new ParserException("Expected TDI after " + type + ".");
+            throw new CompilerException("Expected TDI after " + type + ".");
         
         
         //Checking for TDI
         tok = tok.getNextToken(); // byte count
         if ( !tok.getLexeme().equalsIgnoreCase(TDI) )
-            throw new ParserException("Expected TDI after " + type + ".");
+            throw new CompilerException("Expected TDI after " + type + ".");
         ArgumentParserResult args = getArgument(tok,TDI );
         tdi = args.argument;
         tok = args.token;
@@ -105,7 +105,7 @@ public class SdrCommand extends Command {
         if ( tok == null || tok.type == Token.NULL  )
             return new SirCommand(numberBytes,tdi, tdo, mask);
         if ( !tok.getLexeme().equalsIgnoreCase(TDO) )
-            throw new ParserException("Unexpected token after TDI.");
+            throw new CompilerException("Unexpected token after TDI.");
         args = getArgument(tok,TDO );
         tdo = args.argument;
         tok = args.token;
@@ -120,7 +120,7 @@ public class SdrCommand extends Command {
             return new SirCommand(numberBytes,tdi, tdo, mask);
 
         if ( !tok.getLexeme().equalsIgnoreCase(MASK) )
-            throw new ParserException("Unexpected token after TDO.");
+            throw new CompilerException("Unexpected token after TDO.");
         args = getArgument(tok,MASK );
         mask = args.argument;
         tok = args.token;
@@ -128,8 +128,24 @@ public class SdrCommand extends Command {
         //Check for extra 
         String extra = getLineEnd(tok);
         if ( extra.length() > 0 )
-            throw new ParserException("Unexpected tokens after parsing MASK:\n"+extra.toString());
+            throw new CompilerException("Unexpected tokens after parsing MASK:\n"+extra.toString());
         return new SirCommand(numberBytes,tdi, tdo, mask);        
+    }
+
+    @Override
+    public void checkConsistency() throws CompilerException {
+        if ( numberBits == 0 )
+            throw new CompilerException("Number of bytes cannot be zero.");
+        final Long maxNumber = getMaximumNumber(numberBits);
+        if ( tdi > maxNumber )
+            throw new CompilerException("TDI cannot fit in the number of bytes.");
+        if ( tdo != null ){
+            if ( tdo > maxNumber )
+                throw new CompilerException("TDO cannot fit in the number of bytes.");
+            if ( mask > maxNumber )
+                throw new CompilerException("MASK cannot fit in the number of bytes.");
+        }
+        
     }
 
 }

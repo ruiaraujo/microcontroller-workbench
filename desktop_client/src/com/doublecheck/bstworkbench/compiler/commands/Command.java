@@ -3,7 +3,7 @@ package com.doublecheck.bstworkbench.compiler.commands;
 
 import org.fife.ui.rsyntaxtextarea.Token;
 
-import com.doublecheck.bstworkbench.compiler.parser.ParserException;
+import com.doublecheck.bstworkbench.compiler.parser.CompilerException;
 
 
 /**
@@ -20,15 +20,29 @@ public abstract class Command {
     protected final static byte MASK = 4;
     protected final static byte SELTAP = 5;
     
+    /**
+     * After parsing correctly, the method should be invoked by the compiler
+     * to check ofr invalid arguments.
+     * @throws CompilerException
+     */
+    public abstract void checkConsistency() throws CompilerException;
     
-    protected static ArgumentParserResult getArgument(Token tok , final String type) throws ParserException{
+    
+    /**
+     * 
+     * @param tok A token belonging to a token linked list
+     * @param type the keyword being parsed, only here for more explicit error messages
+     * @return an {@link ArgumentParserResult}'s instance with the updated token state and the parsed argument.
+     * @throws CompilerException
+     */
+    protected static ArgumentParserResult getArgument(Token tok , final String type) throws CompilerException{
         Long ret = null;
         //Checking for '('
         tok = tok.getNextToken();
         if (  tok.type  == Token.WHITESPACE )
             tok = tok.getNextToken();
         if ( tok.type != Token.SEPARATOR )
-            throw new ParserException("Expected '(' after " + type + ".");
+            throw new CompilerException("Expected '(' after " + type + ".");
         
         //Checking for the argument
         tok = tok.getNextToken();
@@ -42,7 +56,7 @@ public abstract class Command {
         if (  tok.type  == Token.WHITESPACE )
             tok = tok.getNextToken();
         if ( tok.type != Token.SEPARATOR )
-            throw new ParserException("Expected ')' after " + type + ".");
+            throw new CompilerException("Expected ')' after " + type + ".");
 
         return new ArgumentParserResult(ret, tok);
     }
@@ -50,7 +64,7 @@ public abstract class Command {
     /**
      * This stupid class only serves the purposes of returning the token
      * as well as the parsed argument.
-     * @author ruka
+     * @author Rui Araújo
      *
      */
     protected static class ArgumentParserResult{
@@ -62,6 +76,12 @@ public abstract class Command {
         }
     }
     
+    /**
+     * Parses the end of a line after a successfully parsed command for
+     * stupid characters while ignoring comments and whitespace.                      
+     * @param tok A token belonging to a token linked list
+     * @return
+     */
     protected static String getLineEnd(Token tok){
         tok =  tok.getNextToken();
         StringBuilder extra = new StringBuilder();
@@ -78,13 +98,17 @@ public abstract class Command {
         return extra.toString().trim();
     }
     
-    protected static Long getMaximumNumber( int numberBytes ){
-        int numberFFs =  numberBytes/4;
-        if ( numberFFs*4 < numberBytes )
-            numberFFs++;
+    /**
+     * Returns the maximum number in decimal format for a certain number of bits.
+     * @param numberBits number of bits
+     * @return the maximum number for a number of bits
+     */
+    protected static Long getMaximumNumber( final int numberBits ){
         StringBuilder maskStr = new StringBuilder();
-        for ( byte i = 0; i <numberFFs; ++i   )
-            maskStr.append('F');
-        return Long.parseLong(maskStr.toString(),16);
+        for ( byte i = 0; i <numberBits; ++i   )
+            maskStr.append('1');
+        if ( maskStr.toString().length() == 0 )
+            return 0L;
+        return Long.parseLong(maskStr.toString(),2);
     }
 }

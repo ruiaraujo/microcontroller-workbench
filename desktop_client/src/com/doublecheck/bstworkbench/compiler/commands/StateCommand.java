@@ -2,7 +2,7 @@ package com.doublecheck.bstworkbench.compiler.commands;
 
 import org.fife.ui.rsyntaxtextarea.Token;
 
-import com.doublecheck.bstworkbench.compiler.parser.ParserException;
+import com.doublecheck.bstworkbench.compiler.parser.CompilerException;
 
 public class StateCommand extends Command {
         
@@ -19,23 +19,23 @@ public class StateCommand extends Command {
      * Parses a line 
      * @param line
      * @return
-     * @throws ParserException 
+     * @throws CompilerException 
      */
-    public static StateCommand parse(Token tok) throws ParserException{
+    public static StateCommand parse(Token tok) throws CompilerException{
         if ( tok == null )
             return null;
         final Token whitespace = tok.getNextToken();
         if ( whitespace == null || whitespace.type == Token.NULL )
-            throw new ParserException("Expected argument after TMS.");
+            throw new CompilerException("Expected argument after TMS.");
         final Token argument = whitespace.getNextToken();
         if ( argument == null || argument.type != Token.IDENTIFIER )
-            throw new ParserException("Expected argument after TMS.");    
+            throw new CompilerException("Expected argument after TMS.");    
         StateCommand ret = new StateCommand(argument.getLexeme());
         
         
         String extra = getLineEnd(argument.getNextToken());
         if ( extra.length() > 0 )
-            throw new ParserException("Unexpected tokens after parsing " + ret.state +
+            throw new CompilerException("Unexpected tokens after parsing " + ret.state +
                     " :\n"+extra.toString());
         return ret;
         
@@ -44,6 +44,12 @@ public class StateCommand extends Command {
 
     public String getState() {
         return state;
+    }
+
+    @Override
+    public void checkConsistency() throws CompilerException {
+        // TODO Do this method after
+        
     }
 
 
