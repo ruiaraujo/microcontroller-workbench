@@ -5,20 +5,21 @@ import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.Collections;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -34,43 +35,42 @@ import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.JTextComponent;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.UndoManager;
+
+
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.Theme;
+import org.fife.ui.rtextarea.Gutter;
+import org.fife.ui.rtextarea.RTextArea;
+import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.RecordableTextAction;
 
 
 import com.doublecheck.bstworkbench.compiler.commands.Command;
 import com.doublecheck.bstworkbench.compiler.parser.Parser;
-import com.doublecheck.bstworkbench.compiler.parser.SupportedOperations;
 import com.doublecheck.bstworkbench.io.IOUtil;
 
 @SuppressWarnings("serial")
-public class Editor extends JFrame {
+public class Editor extends JFrame  implements  SyntaxConstants{
 
     private final static String TITLE = "Microcontroller Workbench";
 
-    JTextPane textPane;
+   // JTextPane textPane;
+    private RTextScrollPane scrollPane;
+    private RSyntaxTextArea textArea;
+
     // AbstractDocument doc;
 
     JTextArea changeLog;
     String newline = "\n";
     HashMap<Object, Action> actions;
 
-    // lines number
-    private LineNumbers lines;
 
     // undo helpers
-    protected UndoAction undoAction;
-    protected RedoAction redoAction;
-    protected UndoManager undo = new UndoManager();
+    protected RecordableTextAction undoAction;
+    protected RecordableTextAction redoAction;
 
     protected CompileAction compileAction;
 
@@ -91,20 +91,17 @@ public class Editor extends JFrame {
         saveFileAction = new SaveFileAction(false);
         saveFileAsAction = new SaveFileAction(true);
         newFileAction = new NewFileAction();
-        // Create the text pane and configure it.
-        textPane = new JTextPane() // line numbers stay in sync
-        {
-            public void paint(Graphics g) {
-                super.paint(g);
-                lines.repaint();
-            }
+        
+        
+        textArea = createTextArea();
+        textArea.setSyntaxEditingStyle(SYNTAX_STYLE_BST);
+        scrollPane = new RTextScrollPane(textArea, true);
+        Gutter gutter = scrollPane.getGutter();
+        gutter.setBookmarkingEnabled(true);
+        URL url = getClass().getClassLoader().getResource("bookmark.png");
+        gutter.setBookmarkIcon(new ImageIcon(url));
 
-            // No wrap
-            public boolean getScrollableTracksViewportWidth() {
-                return getUI().getPreferredSize(this).width <= getParent()
-                        .getSize().width;
-            }
-        };
+       
 
         chooser = new JFileChooser(System.getProperty("user.dir")) {
             @Override
@@ -129,16 +126,7 @@ public class Editor extends JFrame {
             }
         };
 
-        textPane.setCaretPosition(0);
-        textPane.setMargin(new Insets(5, 5, 5, 5));
 
-        JScrollPane scrollPane = new JScrollPane(textPane);
-        scrollPane.setPreferredSize(new Dimension(200, 200));
-
-        lines = new LineNumbers(scrollPane, textPane);
-        JPanel editor = new JPanel(new BorderLayout());
-        editor.add(lines, BorderLayout.LINE_START);
-        editor.add(scrollPane, BorderLayout.CENTER);
 
         // Create the text area for the status log and configure it.
         changeLog = new JTextArea(5, 30);
@@ -147,7 +135,7 @@ public class Editor extends JFrame {
 
         // Create a split pane for the change log and the text area.
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                editor, scrollPaneForLog);
+                scrollPane, scrollPaneForLog);
         splitPane.setOneTouchExpandable(true);
         splitPane.setResizeWeight(1.0);
         // Create the status area.
@@ -161,14 +149,11 @@ public class Editor extends JFrame {
         getContentPane().add(addButtons(), BorderLayout.LINE_END);
 
         // Set up the menu bar.
-        actions = createActionTable(textPane);
-        JMenu fileMenu = createFileMenu();
-        JMenu editMenu = createEditMenu();
-        JMenu actionMenu = createActionMenu();
-        JMenuBar mb = new JMenuBar();
-        mb.add(fileMenu);
-        mb.add(editMenu);
-        mb.add(actionMenu);
+        final JMenuBar mb = new JMenuBar();
+        mb.add(createFileMenu());
+        mb.add(createEditMenu());
+        mb.add(createActionMenu());
+        mb.add(createThemeMenu());
         setJMenuBar(mb);
 
         // Add some key bindings.
@@ -182,16 +167,29 @@ public class Editor extends JFrame {
             }
         });
         
-        // Put the initial text into the text pane.
-        textPane.setCaretPosition(0);
 
         // Start watching for undoable edits and caret changes.
-        textPane.getStyledDocument().addUndoableEditListener(
-                new MyUndoableEditListener());
-        textPane.addCaretListener(caretListenerLabel);
-        textPane.getStyledDocument().addDocumentListener(new AutoCompleteListener());
+    //    textArea.getDocument().addUndoableEditListener(
+    //            new MyUndoableEditListener());
+        textArea.addCaretListener(caretListenerLabel);
         
     }
+    
+    /**
+     * Creates the text area for this application.
+     *
+     * @return The text area.
+     */
+    private RSyntaxTextArea createTextArea() {
+        RSyntaxTextArea textArea = new RSyntaxTextArea(25, 50);
+        textArea.setCaretPosition(0);
+        textArea.requestFocusInWindow();
+        textArea.setMarkOccurrences(true);
+        textArea.setAntiAliasingEnabled(true);
+        textArea.setCodeFoldingEnabled(true);
+        return textArea;
+    }
+
 
     protected JPanel addButtons() {
         final JPanel buttonsPanel = new JPanel();
@@ -236,10 +234,6 @@ public class Editor extends JFrame {
     // This one listens for edits that can be undone.
     protected class MyUndoableEditListener implements UndoableEditListener {
         public void undoableEditHappened(UndoableEditEvent e) {
-            // Remember the edit and update the menus.
-            undo.addEdit(e.getEdit());
-            undoAction.updateUndoState();
-            redoAction.updateRedoState();
             edited = true;
             if ( currentFile == null )
                 setTitle(TITLE + " - *New File");
@@ -251,16 +245,9 @@ public class Editor extends JFrame {
     // Add a couple of emacs key bindings for navigation.
     // Add also undo and redo bindings
     protected void addBindings() {
-        InputMap inputMap = textPane.getInputMap();
+        InputMap inputMap = textArea.getInputMap();
         KeyStroke key = null;
         
-        // Ctrl-z to undo
-        key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.CTRL_MASK);
-        inputMap.put(key, undoAction);
-
-        // Ctrl-y to redo
-        key = KeyStroke.getKeyStroke(KeyEvent.VK_Y, Event.CTRL_MASK);
-        inputMap.put(key, redoAction);
 
         // Ctrl-n to open an file
         key = KeyStroke.getKeyStroke(KeyEvent.VK_N, Event.CTRL_MASK);
@@ -284,8 +271,6 @@ public class Editor extends JFrame {
         key = KeyStroke.getKeyStroke(KeyEvent.VK_C, Event.ALT_MASK);
         inputMap.put(key, compileAction);
         
-        inputMap.put(KeyStroke.getKeyStroke("ENTER"), COMMIT_ACTION);
-        textPane.getActionMap().put(COMMIT_ACTION, new CommitAction());
         
         
 
@@ -345,98 +330,42 @@ public class Editor extends JFrame {
         JMenu menu = new JMenu("Edit");
 
         // Undo and redo are actions of our own creation.
-        undoAction = new UndoAction();
+        undoAction = RTextArea.getAction(RTextArea.UNDO_ACTION);
         menu.add(undoAction);
 
-        redoAction = new RedoAction();
+        redoAction = RTextArea.getAction(RTextArea.REDO_ACTION);
         menu.add(redoAction);
 
         menu.addSeparator();
 
         // These actions come from the default editor kit.
         // Get the ones we want and stick them in the menu.
-        menu.add(getActionByName(DefaultEditorKit.cutAction));
-        menu.add(getActionByName(DefaultEditorKit.copyAction));
-        menu.add(getActionByName(DefaultEditorKit.pasteAction));
+        menu.add(RTextArea.getAction(RTextArea.CUT_ACTION));
+        menu.add(RTextArea.getAction(RTextArea.COPY_ACTION));
+        menu.add(RTextArea.getAction(RTextArea.PASTE_ACTION));
 
         menu.addSeparator();
 
-        menu.add(getActionByName(DefaultEditorKit.selectAllAction));
+        menu.add(RTextArea.getAction(RTextArea.SELECT_ALL_ACTION));
         return menu;
     }
+    
 
-    // The following two methods allow us to find an
-    // action provided by the editor kit by its name.
-    private HashMap<Object, Action> createActionTable(
-            JTextComponent textComponent) {
-        HashMap<Object, Action> actions = new HashMap<Object, Action>();
-        Action[] actionsArray = textComponent.getActions();
-        for (int i = 0; i < actionsArray.length; i++) {
-            Action a = actionsArray[i];
-            actions.put(a.getValue(Action.NAME), a);
-        }
-        return actions;
+    private JMenu createThemeMenu() {
+
+        final JMenu menu = new JMenu("Themes");
+        menu.add(new JMenuItem(new ThemeAction("Default", "/default.xml")));
+        menu.add(new JMenuItem(new ThemeAction("Dark", "/dark.xml")));
+        menu.add(new JMenuItem(new ThemeAction("Eclipse", "/eclipse.xml")));
+        menu.add(new JMenuItem(new ThemeAction("Visual Studio", "/vs.xml")));
+
+        return menu;
+
     }
 
-    private Action getActionByName(String name) {
-        return actions.get(name);
-    }
 
-    class UndoAction extends AbstractAction {
-        public UndoAction() {
-            super("Undo");
-            setEnabled(false);
-        }
 
-        public void actionPerformed(ActionEvent e) {
-            try {
-                undo.undo();
-            } catch (CannotUndoException ex) {
-                System.out.println("Unable to undo: " + ex);
-                ex.printStackTrace();
-            }
-            updateUndoState();
-            redoAction.updateRedoState();
-        }
 
-        protected void updateUndoState() {
-            if (undo.canUndo()) {
-                setEnabled(true);
-                putValue(Action.NAME, undo.getUndoPresentationName());
-            } else {
-                setEnabled(false);
-                putValue(Action.NAME, "Undo");
-            }
-        }
-    }
-
-    class RedoAction extends AbstractAction {
-        public RedoAction() {
-            super("Redo");
-            setEnabled(false);
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            try {
-                undo.redo();
-            } catch (CannotRedoException ex) {
-                System.out.println("Unable to redo: " + ex);
-                ex.printStackTrace();
-            }
-            updateRedoState();
-            undoAction.updateUndoState();
-        }
-
-        protected void updateRedoState() {
-            if (undo.canRedo()) {
-                setEnabled(true);
-                putValue(Action.NAME, undo.getRedoPresentationName());
-            } else {
-                setEnabled(false);
-                putValue(Action.NAME, "Redo");
-            }
-        }
-    }
 
     class CompileAction extends AbstractAction {
         public CompileAction() {
@@ -444,7 +373,7 @@ public class Editor extends JFrame {
         }
 
         public void actionPerformed(ActionEvent e) {
-            if ( textPane.getText().trim().length() == 0 )
+            if ( textArea.getText().trim().length() == 0 )
             {
                 changeLog.append("There is nothing to compile\n");
                 return;
@@ -453,7 +382,7 @@ public class Editor extends JFrame {
             if ( changeLog.getText().length() != 0 )//get some space
                 changeLog.append("\n\n\n");
             changeLog.append("Compiling\n");
-            parser.parse(textPane.getText());
+            parser.parse(textArea.getText());
             if ( parser.detectedErrors() )
             {
                 for ( String s : parser.getListErrors() )
@@ -505,10 +434,10 @@ public class Editor extends JFrame {
             if (chooser.showOpenDialog(Editor.this) == JFileChooser.APPROVE_OPTION) {
                 currentFile = chooser.getSelectedFile();
                 setTitle(TITLE + " - " + currentFile.getAbsolutePath());
-                textPane.setText(IOUtil.readFile(currentFile));
-                undo.discardAllEdits();
-                redoAction.updateRedoState();
-                undoAction.updateUndoState();
+                textArea.setText(IOUtil.readFile(currentFile));
+                textArea.discardAllEdits();
+               // redoAction.updateRedoState();
+              //  undoAction.updateUndoState();
                 edited = false;
             }
         }
@@ -524,7 +453,7 @@ public class Editor extends JFrame {
 
         public void actionPerformed(ActionEvent e) {
             if (currentFile != null && !alwaysChooseFile) {
-                if (!IOUtil.saveFile(currentFile, textPane.getText())) {
+                if (!IOUtil.saveFile(currentFile, textArea.getText())) {
                     JOptionPane.showMessageDialog(Editor.this,
                             "There was an error while saving:\n"
                                     + currentFile.getAbsolutePath(),
@@ -539,7 +468,7 @@ public class Editor extends JFrame {
             }
             if (chooser.showSaveDialog(Editor.this) == JFileChooser.APPROVE_OPTION) {
                 currentFile = chooser.getSelectedFile();
-                if ( IOUtil.saveFile(currentFile, textPane.getText()))
+                if ( IOUtil.saveFile(currentFile, textArea.getText()))
                 {
                     edited = false;
                     setTitle(TITLE + " - " + currentFile.getAbsolutePath());
@@ -557,100 +486,36 @@ public class Editor extends JFrame {
         public void actionPerformed(ActionEvent e) {
                 currentFile = null;
                 setTitle(TITLE+ " - New File");
-                textPane.setText("");
-                undo.discardAllEdits();
-                redoAction.updateRedoState();
-                undoAction.updateUndoState();
+                textArea.setText("");
+                textArea.discardAllEdits();
+            //    redoAction.updateRedoState();
+             //   undoAction.updateUndoState();
                 edited = false;
         }
     }
     
-   
-    // Auto completion support
-    private class AutoCompleteListener implements DocumentListener{
-        public void changedUpdate(DocumentEvent ev) {
+    
+    // Theme support
+
+    private class ThemeAction extends AbstractAction {
+
+        private String xml;
+
+        public ThemeAction(String name, String xml) {
+            putValue(NAME, name);
+            this.xml = xml;
         }
-         
-        public void removeUpdate(DocumentEvent ev) {
-        }
-         
-        public void insertUpdate(DocumentEvent ev) {
-            if (ev.getLength() != 1) {
-                return;
-            }
-             
-            int pos = ev.getOffset();
-            String content = null;
+
+        public void actionPerformed(ActionEvent e) {
+            InputStream in = getClass().getResourceAsStream(xml);
             try {
-                content = textPane.getText(0, pos + 1);
-            } catch (BadLocationException e) {
-                e.printStackTrace();
-            }
-             
-            // Find where the word starts
-            int w;
-            for (w = pos; w >= 0; w--) {
-                if (! Character.isLetter(content.charAt(w))) {
-                    break;
-                }
-            }
-            
-            
-            if (pos - w < 1) {
-                // Too few chars
-                return;
-            }
-             
-            String prefix = content.substring(w + 1).toLowerCase();
-            List<String> words = SupportedOperations.getSupportedOperations();
-            int n = Collections.binarySearch(words, prefix);
-            if (n < 0 && -n <= words.size()) {
-                String match = words.get(-n - 1);
-                if (match.startsWith(prefix)) {
-                    // A completion is found
-                    String completion = match.substring(pos - w);
-                    // We cannot modify Document from within notification,
-                    // so we submit a task that does the change later
-                    SwingUtilities.invokeLater(
-                            new CompletionTask(completion, pos + 1));
-                }
-            } else {
-                // Nothing found
-                mode = Mode.INSERT;
+                Theme theme = Theme.load(in);
+                theme.apply(textArea);
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
             }
         }
+
     }
-    private static final String COMMIT_ACTION = "commit";
-    private static enum Mode { INSERT, COMPLETION };
-    private Mode mode = Mode.INSERT;
-    private class CompletionTask implements Runnable {
-        String completion;
-        int position;
-         
-        CompletionTask(String completion, int position) {
-            this.completion = completion;
-            this.position = position;
-        }
-         
-        public void run() {
-            textPane.replaceSelection(completion);//, position);
-            textPane.setCaretPosition(position + completion.length());
-            textPane.moveCaretPosition(position);
-            mode = Mode.COMPLETION;
-        }
-    }
-     
-    private class CommitAction extends AbstractAction {
-        public void actionPerformed(ActionEvent ev) {
-            if (mode == Mode.COMPLETION) {
-                int pos = textPane.getSelectionEnd();
-                textPane.setCaretPosition(pos);
-                textPane.replaceSelection(" ");
-                textPane.setCaretPosition(pos + 1);
-                mode = Mode.INSERT;
-            } else {
-                textPane.replaceSelection("\n");
-            }
-        }
-    }
+   
 }

@@ -8,6 +8,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Utilities;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
 // This listens for and reports caret movements.
 @SuppressWarnings("serial")
 public class CaretListenerLabel extends JLabel implements CaretListener {
@@ -31,7 +33,7 @@ public class CaretListenerLabel extends JLabel implements CaretListener {
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
-        return rn+1;
+        return rn;
     }
 
     public int getColumn(int pos, JTextComponent editor) {
@@ -51,8 +53,17 @@ public class CaretListenerLabel extends JLabel implements CaretListener {
 	protected void displaySelectionInfo(final int dot, final JTextComponent editor ) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				int row = getRow(dot , editor );
-				int col = getColumn(dot , editor );
+			    int row = 0;
+                int col = 0;
+			    if ( editor instanceof RSyntaxTextArea ){
+			        row = ((RSyntaxTextArea)editor).getCaretLineNumber()+1;
+			        col = ((RSyntaxTextArea)editor).getCaretOffsetFromLineStart();
+			    }
+			    else{
+			        row = getRow(dot , editor );
+	                col = getColumn(dot , editor );
+			    }
+				
 				setText("Position  " + row + ":" + col);
 			}
 		});
