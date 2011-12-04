@@ -3,7 +3,7 @@ package com.doublecheck.bstworkbench.compiler.commands;
 
 import org.fife.ui.rsyntaxtextarea.Token;
 
-import com.doublecheck.bstworkbench.compiler.parser.CompilerException;
+import com.doublecheck.bstworkbench.compiler.CompilerException;
 
 
 /**

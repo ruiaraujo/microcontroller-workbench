@@ -1,16 +1,11 @@
-package com.doublecheck.bstworkbench.compiler.parser;
+package com.doublecheck.bstworkbench.compiler.commands;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.fife.ui.rsyntaxtextarea.Token;
 
-import com.doublecheck.bstworkbench.compiler.commands.Command;
-import com.doublecheck.bstworkbench.compiler.commands.SdrCommand;
-import com.doublecheck.bstworkbench.compiler.commands.SeltapCommand;
-import com.doublecheck.bstworkbench.compiler.commands.SirCommand;
-import com.doublecheck.bstworkbench.compiler.commands.StateCommand;
-import com.doublecheck.bstworkbench.compiler.commands.TmsCommand;
+import com.doublecheck.bstworkbench.compiler.CompilerException;
 
 public final class SupportedOperations {
     public final static String SELTAP = "seltap";

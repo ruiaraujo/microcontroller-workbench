@@ -45,8 +45,8 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.RecordableTextAction;
 
 
+import com.doublecheck.bstworkbench.compiler.Compiler;
 import com.doublecheck.bstworkbench.compiler.commands.Command;
-import com.doublecheck.bstworkbench.compiler.parser.Parser;
 import com.doublecheck.bstworkbench.io.IOUtil;
 
 @SuppressWarnings("serial")
@@ -372,7 +372,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
                 changeLog.append("There is nothing to compile\n");
                 return;
             }
-            Parser parser = new Parser();
+            Compiler parser = new Compiler();
             if ( changeLog.getText().length() != 0 )//get some space
                 changeLog.append("\n\n\n");
             changeLog.append("Compiling\n");

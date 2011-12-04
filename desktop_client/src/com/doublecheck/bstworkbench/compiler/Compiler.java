@@ -1,4 +1,4 @@
-package com.doublecheck.bstworkbench.compiler.parser;
+package com.doublecheck.bstworkbench.compiler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,11 +7,12 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.commands.Command;
+import com.doublecheck.bstworkbench.compiler.commands.SupportedOperations;
 
-public class Parser {
+public class Compiler {
     private final List<Error> errors;
     private final List<Command> commands;
-    public Parser(){
+    public Compiler(){
         errors = new ArrayList<Error>();
         commands = new ArrayList<Command>();
     }

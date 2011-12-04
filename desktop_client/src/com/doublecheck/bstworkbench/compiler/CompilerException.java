@@ -1,4 +1,4 @@
-package com.doublecheck.bstworkbench.compiler.parser;
+package com.doublecheck.bstworkbench.compiler;
 
 @SuppressWarnings("serial")
 public class CompilerException extends Exception {
