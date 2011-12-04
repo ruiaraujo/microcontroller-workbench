@@ -9,7 +9,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -501,9 +500,9 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         public void actionPerformed(ActionEvent e) {
             InputStream in = getClass().getResourceAsStream(xml);
             try {
-                Theme theme = Theme.load(in);
-                theme.apply(textArea);
-            } catch (IOException ioe) {
+               Theme theme = Theme.load(in);
+               theme.apply(textArea);
+            } catch (Exception ioe) {
                 ioe.printStackTrace();
             }
         }

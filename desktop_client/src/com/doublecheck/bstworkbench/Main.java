@@ -3,6 +3,7 @@ package com.doublecheck.bstworkbench;
 import java.awt.Dimension;
 
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import com.doublecheck.bstworkbench.ui.Editor;
 
@@ -26,18 +27,12 @@ public final class Main {
     public static void main(String[] args) {
         //Schedule a job for the event dispatch thread:
         //creating and showing this application's GUI.
-    /*	try {
-        			UIManager.setLookAndFeel(
-        			    UIManager.getSystemLookAndFeelClassName());
-        		} catch (ClassNotFoundException e) {
-        			e.printStackTrace();
-        		} catch (InstantiationException e) {
-        			e.printStackTrace();
-        		} catch (IllegalAccessException e) {
-        			e.printStackTrace();
-        		} catch (UnsupportedLookAndFeelException e) {
-        			e.printStackTrace();
-        		}*/
+    	try {
+			UIManager.setLookAndFeel(
+			    UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
         		
