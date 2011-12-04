@@ -310,27 +310,26 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         InputMap inputMap = textArea.getInputMap();
         KeyStroke key = null;
         
-
         // Ctrl-n to open an file
-        key = KeyStroke.getKeyStroke(KeyEvent.VK_N, Event.CTRL_MASK);
+        key = (KeyStroke) newFileAction.getValue(Action.ACCELERATOR_KEY);
         inputMap.put(key, newFileAction);
         
         // Ctrl-o to open an file
-        key = KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK);
+        key = (KeyStroke) openFileAction.getValue(Action.ACCELERATOR_KEY);
         inputMap.put(key, openFileAction);
         
 
         // Ctrl-s to save an file
-        key = KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK);
+        key = (KeyStroke) saveFileAction.getValue(Action.ACCELERATOR_KEY);
         inputMap.put(key, saveFileAction);
         
 
         // Ctrl-Shift-s to save an file
-        key = KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK|Event.SHIFT_MASK);
+        key = (KeyStroke) saveFileAsAction.getValue(Action.ACCELERATOR_KEY);
         inputMap.put(key, saveFileAsAction); 
 
         // Alt-c to compile
-        key = KeyStroke.getKeyStroke(KeyEvent.VK_C, Event.ALT_MASK);
+        key = (KeyStroke) compileAction.getValue(Action.ACCELERATOR_KEY);
         inputMap.put(key, compileAction);
         
         
