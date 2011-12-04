@@ -27,7 +27,9 @@ public class SirCommand extends Command {
     }
 
     public String toString(){
-        final StringBuilder internal = new StringBuilder("SIR TDI(");
+        final StringBuilder internal = new StringBuilder("SIR ");
+        internal.append(numberBytes);
+        internal.append(" TDI(");
         internal.append(tdi);
         internal.append( ") ");
         if ( tdo != null )

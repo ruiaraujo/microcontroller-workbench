@@ -25,9 +25,15 @@ public class Parser {
                 continue;
             if ( tok.type == Token.WHITESPACE )
                 tok = tok.getNextToken();
+            if ( tok.type == Token.COMMENT_MULTILINE )
+            {
+                while ( tok != null && tok.type == Token.COMMENT_MULTILINE )
+                    tok = tok.getNextToken();
+                if ( tok == null )
+                    continue;
+            }
             switch ( tok.type ){
-                case Token.COMMENT_EOL:
-                case Token.COMMENT_MULTILINE:   
+                case Token.COMMENT_EOL:  
                 case Token.NULL: 
                 case Token.WHITESPACE: break;
                 case Token.RESERVED_WORD:    {
@@ -40,8 +46,7 @@ public class Parser {
                     } catch (ParserException e) {
                         addError(i+1,e.getMessage());
                     }
-                    tok = tok.getNextToken();
-                    continue;
+                    break;
                 }
                 default: 
                     addError(i+1,"Unknown identifier: " + new String(tok.text));

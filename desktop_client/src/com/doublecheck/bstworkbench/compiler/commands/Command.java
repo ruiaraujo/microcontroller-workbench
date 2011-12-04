@@ -70,7 +70,7 @@ public abstract class Command {
         while ( tok != null && tok.type != Token.NULL  )
         {
             
-            if ( tok.type != Token.NULL && tok.type != Token.WHITESPACE &&  tok.type != Token.COMMENT_EOL )
+            if ( tok.type != Token.NULL && tok.type != Token.WHITESPACE &&  tok.type != Token.COMMENT_EOL &&  tok.type != Token.COMMENT_MULTILINE )
             {
                 extra.append(tok.getLexeme());
                 extra.append(' ');
