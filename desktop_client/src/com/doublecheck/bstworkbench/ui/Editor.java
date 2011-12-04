@@ -163,8 +163,8 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         
 
         // Start watching for undoable edits and caret changes.
-    //    textArea.getDocument().addUndoableEditListener(
-    //            new MyUndoableEditListener());
+        textArea.getDocument().addUndoableEditListener(
+                new MyUndoableEditListener());
         textArea.addCaretListener(caretListenerLabel);
         
     }
@@ -482,8 +482,6 @@ public class Editor extends JFrame  implements  SyntaxConstants{
                 setTitle(TITLE+ " - New File");
                 textArea.setText("");
                 textArea.discardAllEdits();
-            //    redoAction.updateRedoState();
-             //   undoAction.updateUndoState();
                 edited = false;
         }
     }
