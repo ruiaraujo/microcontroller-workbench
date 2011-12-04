@@ -23,9 +23,16 @@ public class Parser {
             String token = tok.nextToken().trim();
             if ( token.length() != 0 )
             {
+                if ( token.startsWith("%") ||  token.startsWith("//") )
+                {
+                    ++line;
+                    if ( tok.hasMoreTokens() )
+                        tok.nextToken();//clean the '\n' that comes after each line
+                    continue;
+                }
                 try {
                     if ( tok.hasMoreTokens() )
-                    tok.nextToken();//clean the '\n' that comes after each line
+                        tok.nextToken();//clean the '\n' that comes after each line
                     Command  com = SupportedOperations.parseLine(token);
                     if ( com != null )
                         commands.add(com);

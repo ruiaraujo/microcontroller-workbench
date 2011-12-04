@@ -594,6 +594,8 @@ public class Editor extends JFrame {
                     break;
                 }
             }
+            
+            
             if (pos - w < 1) {
                 // Too few chars
                 return;
