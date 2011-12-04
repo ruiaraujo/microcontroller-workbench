@@ -9,7 +9,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -48,7 +47,6 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import org.fife.ui.rtextarea.RecordableTextAction;
 
 
 import com.doublecheck.bstworkbench.compiler.Compiler;
@@ -60,17 +58,10 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 
     private final static String TITLE = "Microcontroller Workbench";
 
-   // JTextPane textPane;
     private RTextScrollPane scrollPane;
     private RSyntaxTextArea textArea;
 
-    // AbstractDocument doc;
-
     private JTextArea changeLog;
-
-    // undo helpers
-    protected RecordableTextAction undoAction;
-    protected RecordableTextAction redoAction;
 
     protected CompileAction compileAction;
 
@@ -349,28 +340,19 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 
     // Create the edit menu.
     protected JMenu createFileMenu() {
-        JMenu menu = new JMenu("File");
+        final JMenu menu = new JMenu("File");
         menu.setMnemonic('F'); // set mnemonic to F
         
-        JMenuItem newFile = new JMenuItem(newFileAction);
-        newFile.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-        menu.add(newFile);
-        
-        JMenuItem openFile = new JMenuItem(openFileAction);
-        menu.add(openFile);
+        menu.add(newFileAction);
+        menu.add(openFileAction);
 
         menu.addSeparator();
         
-        JMenuItem saveFile = new JMenuItem("Save File");
-        saveFile.addActionListener(saveFileAction);
-        menu.add(saveFile);
-        
-        JMenuItem saveAsFile = new JMenuItem("Save File As");
-        menu.add(saveAsFile);
+        menu.add(saveFileAction);
+        menu.add(saveFileAsAction);
         menu.addSeparator();
 
-        JMenuItem aboutItem = new JMenuItem("About");
+        final JMenuItem aboutItem = new JMenuItem("About");
         aboutItem.setMnemonic('A');
         menu.add(aboutItem);
 
@@ -387,10 +369,9 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 
     // Create the edit menu.
     protected JMenu createActionMenu() {
-        JMenu menu = new JMenu("Action");
+        final JMenu menu = new JMenu("Action");
         menu.setMnemonic('A'); // set mnemonic to F
-        JMenuItem aboutItem = new JMenuItem(compileAction);
-        menu.add(aboutItem);
+        menu.add(compileAction);
         menu.addSeparator();
 
         return menu;
@@ -398,14 +379,12 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 
     // Create the edit menu.
     protected JMenu createEditMenu() {
-        JMenu menu = new JMenu("Edit");
+        final JMenu menu = new JMenu("Edit");
 
         // Undo and redo are actions of our own creation.
-        undoAction = RTextArea.getAction(RTextArea.UNDO_ACTION);
-        menu.add(undoAction);
+        menu.add(RTextArea.getAction(RTextArea.UNDO_ACTION));
 
-        redoAction = RTextArea.getAction(RTextArea.REDO_ACTION);
-        menu.add(redoAction);
+        menu.add(RTextArea.getAction(RTextArea.REDO_ACTION));
 
         menu.addSeparator();
 
@@ -441,6 +420,8 @@ public class Editor extends JFrame  implements  SyntaxConstants{
     class CompileAction extends AbstractAction {
         public CompileAction() {
             super("Compile");
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                    KeyEvent.VK_C, ActionEvent.ALT_MASK));
         }
 
         public void actionPerformed(ActionEvent e) {
@@ -499,6 +480,8 @@ public class Editor extends JFrame  implements  SyntaxConstants{
     class OpenFileAction extends AbstractAction {
         public OpenFileAction() {
             super("Open File");
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         }
 
         public void actionPerformed(ActionEvent e) {
@@ -519,6 +502,12 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         private final boolean alwaysChooseFile;
         public SaveFileAction(boolean alwaysChooseFile) {
             super("Save File");
+            if ( alwaysChooseFile )
+                putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                        KeyEvent.VK_S, ActionEvent.CTRL_MASK|ActionEvent.SHIFT_MASK));
+            else
+                putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                        KeyEvent.VK_S, ActionEvent.CTRL_MASK));
             this.alwaysChooseFile = alwaysChooseFile;
         }
 
@@ -552,6 +541,8 @@ public class Editor extends JFrame  implements  SyntaxConstants{
     class NewFileAction extends AbstractAction {
         public NewFileAction() {
             super("New File");
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                    KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         }
 
         public void actionPerformed(ActionEvent e) {
