@@ -5,12 +5,9 @@ import org.fife.ui.rsyntaxtextarea.Token;
 import com.doublecheck.bstworkbench.compiler.parser.ParserException;
 
 public class TmsCommand extends Command {
-    
-    private final static byte tmsIdentifier = 1;
-    
+        
     private final byte tmsState;
     public TmsCommand(final byte state) {
-        super(tmsIdentifier );
         tmsState = state; 
     }
     

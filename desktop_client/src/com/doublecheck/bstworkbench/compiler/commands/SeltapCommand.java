@@ -6,12 +6,9 @@ import org.fife.ui.rsyntaxtextarea.Token;
 import com.doublecheck.bstworkbench.compiler.parser.ParserException;
 
 public class SeltapCommand extends Command {
-    
-    private final static byte seltapIdentifier = 2;
-    
+        
     private final byte tapNumber;
     public SeltapCommand(final byte state) {
-        super(seltapIdentifier );
         tapNumber = state; 
     }
     

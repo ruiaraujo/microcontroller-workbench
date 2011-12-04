@@ -6,7 +6,6 @@ import com.doublecheck.bstworkbench.compiler.parser.ParserException;
 
 public class SirCommand extends Command {
     
-    private final static byte sirIdentifier = 5;
     
     protected final static String TDI = "tdi";
     protected final static String TDO = "tdo";
@@ -19,7 +18,6 @@ public class SirCommand extends Command {
     
     
     public SirCommand(final byte numberBytes , final Long tdi, final Long tdo, final Long mask) {
-        super(sirIdentifier);
         this.numberBytes = numberBytes;
         this.tdi = tdi;
         this.tdo = tdo;
@@ -101,17 +99,11 @@ public class SirCommand extends Command {
         tdo = args.argument;
         tok = args.token;
         
-        //Checking for MASK
+        //Checking for MASK ( optional )
         tok = tok.getNextToken(); // byte count
         if ( tok == null || tok.type == Token.NULL  )
         {
-            byte numberFFs = (byte) (numberBytes/4);
-            if ( numberFFs*4 < numberBytes )
-                numberFFs++;
-            StringBuilder maskStr = new StringBuilder();
-            for ( byte i = 0; i <numberFFs; ++i   )
-                maskStr.append('F');
-            mask = Long.parseLong(maskStr.toString(),16);
+            mask = getMaximumNumber(numberBytes);
             return new SirCommand(numberBytes,tdi, tdo, mask);
         }
         
@@ -119,13 +111,7 @@ public class SirCommand extends Command {
         tok = tok.getNextToken(); // byte count
         if ( tok == null || tok.type == Token.NULL  )
         {
-            byte numberFFs = (byte) (numberBytes/4);
-            if ( numberFFs*4 < numberBytes )
-                numberFFs++;
-            StringBuilder maskStr = new StringBuilder();
-            for ( byte i = 0; i <numberFFs; ++i   )
-                maskStr.append('F');
-            mask = Long.parseLong(maskStr.toString(),16);
+            mask = getMaximumNumber(numberBytes);
             return new SirCommand(numberBytes,tdi, tdo, mask);
         }
         if ( !tok.getLexeme().equalsIgnoreCase(MASK) )

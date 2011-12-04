@@ -14,13 +14,11 @@ import com.doublecheck.bstworkbench.compiler.parser.ParserException;
  */
 public abstract class Command {
     
-    private final byte identifier;
-    public Command( final byte identifier){
-        this.identifier = identifier;
-    }
-    public byte getIdentifier() {
-        return identifier;
-    }
+    protected final static byte TMS = 1;
+    protected final static byte TDI = 2;
+    protected final static byte TDO = 3;
+    protected final static byte MASK = 4;
+    protected final static byte SELTAP = 5;
     
     
     protected static ArgumentParserResult getArgument(Token tok , final String type) throws ParserException{
@@ -79,5 +77,14 @@ public abstract class Command {
         }
         return extra.toString().trim();
     }
-
+    
+    protected static Long getMaximumNumber( int numberBytes ){
+        int numberFFs =  numberBytes/4;
+        if ( numberFFs*4 < numberBytes )
+            numberFFs++;
+        StringBuilder maskStr = new StringBuilder();
+        for ( byte i = 0; i <numberFFs; ++i   )
+            maskStr.append('F');
+        return Long.parseLong(maskStr.toString(),16);
+    }
 }

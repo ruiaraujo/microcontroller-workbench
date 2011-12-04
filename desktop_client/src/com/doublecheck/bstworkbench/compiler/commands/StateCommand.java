@@ -5,12 +5,9 @@ import org.fife.ui.rsyntaxtextarea.Token;
 import com.doublecheck.bstworkbench.compiler.parser.ParserException;
 
 public class StateCommand extends Command {
-    
-    private final static byte stateIdentifier = 3;
-    
+        
     private final String state;
     public StateCommand(final String state) {
-        super(stateIdentifier );
         this.state = state; 
     }
     

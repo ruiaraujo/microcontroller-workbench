@@ -6,9 +6,7 @@ import org.fife.ui.rsyntaxtextarea.Token;
 import com.doublecheck.bstworkbench.compiler.parser.ParserException;
 
 public class SdrCommand extends Command {
-    
-    private final static byte sdrIdentifier = 4;
-    
+        
     protected final static String TDI = "tdi";
     protected final static String TDO = "tdo";
     protected final static String MASK = "mask";
@@ -20,7 +18,6 @@ public class SdrCommand extends Command {
     
     
     public SdrCommand(final byte numberBytes , final Long tdi, final Long tdo, final Long mask) {
-        super(sdrIdentifier);
         this.numberBytes = numberBytes;
         this.tdi = tdi;
         this.tdo = tdo;
