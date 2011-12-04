@@ -1,7 +1,7 @@
 package com.doublecheck.bstworkbench.compiler.commands;
 
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
+
+import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.parser.ParserException;
 
@@ -23,51 +23,61 @@ public abstract class Command {
     }
     
     
-    protected static Long getArgument(final StringTokenizer tok , final String type) throws ParserException{
-        String token = null;
+    protected static ArgumentParserResult getArgument(Token tok , final String type) throws ParserException{
         Long ret = null;
         //Checking for '('
-        try{
-            do{
-                token = tok.nextToken().trim();
-            } while( token.length() == 0 );
-            if ( !token.equalsIgnoreCase("(") )
-                throw new ParserException("Expected '(' after " + type + ".");
-        } 
-        catch ( NoSuchElementException e ) 
-        {
+        tok = tok.getNextToken();
+        if (  tok.type  == Token.WHITESPACE )
+            tok = tok.getNextToken();
+        if ( tok.type != Token.SEPARATOR )
             throw new ParserException("Expected '(' after " + type + ".");
-        }
         
         //Checking for the argument
-        try{
-            do{
-                token = tok.nextToken().trim();
-            } while( token.length() == 0 );
-            ret = Long.parseLong(token,16);
-        } 
-        catch ( NoSuchElementException e ) 
-        {
-            throw new ParserException("Expected numeric argument after " + type + ".");
-        }
-        catch ( NumberFormatException e ) 
-        {
-            throw new ParserException("Error parsing the numeric argument (" + token +") from TDI.");
-        }
+        tok = tok.getNextToken();
+        if (  tok.type  == Token.WHITESPACE )
+            tok = tok.getNextToken();
+        ret = Long.parseLong(tok.getLexeme(),16);
+
         
         //Checking for '('
-        try{
-            do{
-                token = tok.nextToken().trim();
-            } while( token.length() == 0 );
-            if ( !token.equalsIgnoreCase(")") )
-                throw new ParserException("Expected ')' after " + type + ".");
-        } 
-        catch ( NoSuchElementException e ) 
-        {
+        tok = tok.getNextToken();
+        if (  tok.type  == Token.WHITESPACE )
+            tok = tok.getNextToken();
+        if ( tok.type != Token.SEPARATOR )
             throw new ParserException("Expected ')' after " + type + ".");
+
+        return new ArgumentParserResult(ret, tok);
+    }
+    
+    /**
+     * This stupid class only serves the purposes of returning the token
+     * as well as the parsed argument.
+     * @author ruka
+     *
+     */
+    protected static class ArgumentParserResult{
+        protected Long argument;
+        protected Token token;
+        protected ArgumentParserResult( final Long ret , final Token tok ){
+            this.argument = ret;
+            this.token = tok;
         }
-        return ret;
+    }
+    
+    protected static String getLineEnd(Token tok){
+        tok =  tok.getNextToken();
+        StringBuilder extra = new StringBuilder();
+        while ( tok != null && tok.type != Token.NULL  )
+        {
+            
+            if ( tok.type != Token.NULL && tok.type != Token.WHITESPACE &&  tok.type != Token.COMMENT_EOL )
+            {
+                extra.append(tok.getLexeme());
+                extra.append(' ');
+            }
+            tok = tok.getNextToken();
+        }
+        return extra.toString().trim();
     }
 
 }

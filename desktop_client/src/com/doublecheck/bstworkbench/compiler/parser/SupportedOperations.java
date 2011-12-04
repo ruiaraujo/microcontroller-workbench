@@ -3,6 +3,8 @@ package com.doublecheck.bstworkbench.compiler.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fife.ui.rsyntaxtextarea.Token;
+
 import com.doublecheck.bstworkbench.compiler.commands.Command;
 import com.doublecheck.bstworkbench.compiler.commands.SdrCommand;
 import com.doublecheck.bstworkbench.compiler.commands.SeltapCommand;
@@ -18,22 +20,17 @@ public final class SupportedOperations {
     public final static String TMS = "tms";
     private static List<String> supportedOperations = null;
     
-    public static Command parseLine( String line ) throws ParserException{
-        if ( line.toLowerCase().equals(TMS) ||
-            line.toLowerCase().startsWith(TMS+" ") ) 
-            return TmsCommand.parse(line);
-        if ( line.toLowerCase().equals(SELTAP) ||
-                line.toLowerCase().startsWith(SELTAP+" ") )
-            return SeltapCommand.parse(line);
-        if ( line.toLowerCase().equals(STATE) ||
-                line.toLowerCase().startsWith(STATE+" ") )
-            return StateCommand.parse(line);
-        if ( line.toLowerCase().equals(SIR) ||
-                line.toLowerCase().startsWith(SIR+" ") )
-            return SirCommand.parse(line);
-        if ( line.toLowerCase().equals(SDR) ||
-                line.toLowerCase().startsWith(SDR+" ") )
-            return SdrCommand.parse(line);
+    public static Command parseLine( Token tok ) throws ParserException{
+        if ( tok.getLexeme().toLowerCase().equals(TMS) ) 
+            return TmsCommand.parse(tok);
+        if ( tok.getLexeme().toLowerCase().equals(SELTAP) )
+            return SeltapCommand.parse(tok);
+        if ( tok.getLexeme().toLowerCase().equals(STATE)  )
+            return StateCommand.parse(tok);
+        if ( tok.getLexeme().toLowerCase().equals(SIR) )
+            return SirCommand.parse(tok);
+        if ( tok.getLexeme().toLowerCase().equals(SDR) )
+            return SdrCommand.parse(tok);
         return null;
         
     }

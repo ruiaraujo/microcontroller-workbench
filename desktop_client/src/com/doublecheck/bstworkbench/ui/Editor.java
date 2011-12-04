@@ -35,6 +35,7 @@ import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
@@ -375,12 +376,12 @@ public class Editor extends JFrame  implements  SyntaxConstants{
             if ( changeLog.getText().length() != 0 )//get some space
                 changeLog.append("\n\n\n");
             changeLog.append("Compiling\n");
-            parser.parse(textArea.getText());
+            parser.parse(((RSyntaxDocument)textArea.getDocument()));
             if ( parser.detectedErrors() )
             {
                 for ( String s : parser.getListErrors() )
                     changeLog.append(s+'\n');
-                changeLog.append("Found erros while compiling\n");
+                changeLog.append("Found errors while compiling\n");
             }
             else
             {

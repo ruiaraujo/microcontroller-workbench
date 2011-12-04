@@ -2,7 +2,9 @@ package com.doublecheck.bstworkbench.compiler.parser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
+
+import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
+import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.commands.Command;
 
@@ -14,37 +16,38 @@ public class Parser {
         commands = new ArrayList<Command>();
     }
     
-    public void parse(String text){
-        final  StringTokenizer tok = new StringTokenizer(text.toLowerCase(), "\n", true);
-        int line = 1;
-        errors.clear();
-        while ( tok.hasMoreTokens() )
+    public void parse(RSyntaxDocument rSyntaxDocument){
+        int size = rSyntaxDocument.getLineCount();
+        for ( int i = 0 ; i < size ; ++i  )
         {
-            String token = tok.nextToken().trim();
-            if ( token.length() != 0 )
-            {
-                if ( token.startsWith("%") ||  token.startsWith("//") )
-                {
-                    ++line;
-                    if ( tok.hasMoreTokens() )
-                        tok.nextToken();//clean the '\n' that comes after each line
+            Token tok = rSyntaxDocument.getTokenListForLine(i);
+            if ( tok.type == Token.NULL )
+                continue;
+            if ( tok.type == Token.WHITESPACE )
+                tok = tok.getNextToken();
+            switch ( tok.type ){
+                case Token.COMMENT_EOL:
+                case Token.COMMENT_MULTILINE:   
+                case Token.NULL: 
+                case Token.WHITESPACE: break;
+                case Token.RESERVED_WORD:    {
+                    try {
+                        Command  com = SupportedOperations.parseLine(tok);
+                        if ( com != null )
+                            commands.add(com);
+                        else
+                            addError(i+1,"Unknown identifier: " + new String(tok.text));
+                    } catch (ParserException e) {
+                        addError(i+1,e.getMessage());
+                    }
+                    tok = tok.getNextToken();
                     continue;
                 }
-                try {
-                    if ( tok.hasMoreTokens() )
-                        tok.nextToken();//clean the '\n' that comes after each line
-                    Command  com = SupportedOperations.parseLine(token);
-                    if ( com != null )
-                        commands.add(com);
-                    else
-                        addError(line,"Unknown identifier: " + token);
-                } catch (ParserException e) {
-                    addError(line,e.getMessage());
-                }
+                default: 
+                    addError(i+1,"Unknown identifier: " + new String(tok.text));
+                    break;
             }
-            ++line;
         }
-            
     }
  
     

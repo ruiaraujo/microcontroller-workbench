@@ -1,7 +1,6 @@
 package com.doublecheck.bstworkbench.compiler.commands;
 
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
+import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.parser.ParserException;
 
@@ -48,69 +47,61 @@ public class SirCommand extends Command {
      * @return
      * @throws ParserException 
      */
-    public static SirCommand parse(String line) throws ParserException{
-        if ( line == null )
+    public static SirCommand parse(Token tok) throws ParserException{
+        if ( tok == null )
             return null;
-        final StringTokenizer tok = new StringTokenizer(line.toLowerCase().trim(), " ()\t", true);
         byte numberBytes = 0;
         Long tdi = null;
         Long tdo = null;
         Long mask = null;
-        String token = null; 
-        do{
-            token = tok.nextToken().trim();
-        } while( token.length() == 0 );// the first token is the command
         
-        do{
-            token = tok.nextToken().trim();
-        } while( token.length() == 0 );
+        tok = tok.getNextToken(); // first should be a whitespace
+        if ( tok == null || tok.type == Token.NULL )
+            throw new ParserException("Expected numeric argument after SIR.");
         
         try{
-            numberBytes = Byte.parseByte(token);
+            tok = tok.getNextToken(); // byte count
+            if ( tok == null || tok.type != Token.LITERAL_NUMBER_HEXADECIMAL )
+                throw new ParserException("Expected numeric argument after SIR.");
+            numberBytes = Byte.parseByte(tok.getLexeme());
         } 
         catch ( NumberFormatException e ) 
         {
-            throw new ParserException("Error parsing the numeric argument (" + token +") after SIR.");
+            throw new ParserException("Error parsing the numeric argument (" + tok.getLexeme() +") after SIR.");
         }
+        
+        tok = tok.getNextToken(); // should be a whitespace
+        if ( tok == null || tok.type == Token.NULL )
+            throw new ParserException("Expected TDI after SIR.");
+        
         
         //Checking for TDI
-        try{
-            do{
-                token = tok.nextToken().trim();
-            } while( token.length() == 0 );
-            if ( !token.equalsIgnoreCase(TDI) )
-                throw new ParserException("Expected TDI after SIR.");
-            tdi = getArgument(tok,TDI );
-        } 
-        catch ( NoSuchElementException e ) 
-        {
+        tok = tok.getNextToken(); // byte count
+        if ( !tok.getLexeme().equalsIgnoreCase(TDI) )
             throw new ParserException("Expected TDI after SIR.");
-        }
+        ArgumentParserResult args = getArgument(tok,TDI );
+        tdi = args.argument;
+        tok = args.token;
+        
+        
+        tok = tok.getNextToken();  // should be a whitespace
+        if ( tok == null || tok.type == Token.NULL  )
+            return new SirCommand(numberBytes,tdi, tdo, mask);
+        
         
         //Checking for TDO
-        try{
-            do{
-                token = tok.nextToken().trim();
-            } while( token.length() == 0 );
-            if ( !token.equalsIgnoreCase(TDO) )
-                throw new ParserException("Unexpected token after TDI.");
-            tdo = getArgument(tok,TDO );
-        } 
-        catch ( NoSuchElementException e ) 
-        {
+        tok = tok.getNextToken(); // byte count
+        if ( tok == null || tok.type == Token.NULL  )
             return new SirCommand(numberBytes,tdi, tdo, mask);
-        }  
+        if ( !tok.getLexeme().equalsIgnoreCase(TDO) )
+            throw new ParserException("Unexpected token after TDI.");
+        args = getArgument(tok,TDO );
+        tdo = args.argument;
+        tok = args.token;
         
         //Checking for MASK
-        try{
-            do{
-                token = tok.nextToken().trim();
-            } while( token.length() == 0 );
-            if ( !token.equalsIgnoreCase(MASK) )
-                throw new ParserException("Unexpected token after TDO.");
-            mask = getArgument(tok,MASK );
-        } 
-        catch ( NoSuchElementException e ) 
+        tok = tok.getNextToken(); // byte count
+        if ( tok == null || tok.type == Token.NULL  )
         {
             byte numberFFs = (byte) (numberBytes/4);
             if ( numberFFs*4 < numberBytes )
@@ -120,25 +111,32 @@ public class SirCommand extends Command {
                 maskStr.append('F');
             mask = Long.parseLong(maskStr.toString(),16);
             return new SirCommand(numberBytes,tdi, tdo, mask);
-        }  
-        
-        if ( tok.hasMoreTokens() )
-        {
-            StringBuilder extra = new StringBuilder();
-            while ( tok.hasMoreTokens() )
-            {
-                String e = tok.nextToken().trim();
-                if ( e.length() > 0 )
-                {
-                    extra.append(e);
-                    extra.append(' ');
-                }
-            }
-            throw new ParserException("Unexpected tokens after parsing MASK :\n"+extra);
         }
-        return new SirCommand(numberBytes,tdi, tdo, mask);        
-
         
+        //Checking for MASK
+        tok = tok.getNextToken(); // byte count
+        if ( tok == null || tok.type == Token.NULL  )
+        {
+            byte numberFFs = (byte) (numberBytes/4);
+            if ( numberFFs*4 < numberBytes )
+                numberFFs++;
+            StringBuilder maskStr = new StringBuilder();
+            for ( byte i = 0; i <numberFFs; ++i   )
+                maskStr.append('F');
+            mask = Long.parseLong(maskStr.toString(),16);
+            return new SirCommand(numberBytes,tdi, tdo, mask);
+        }
+        if ( !tok.getLexeme().equalsIgnoreCase(MASK) )
+            throw new ParserException("Unexpected token after TDO.");
+        args = getArgument(tok,MASK );
+        mask = args.argument;
+        tok = args.token;
+ 
+        //Check for extra 
+        String extra = getLineEnd(tok);
+        if ( extra.length() > 0 )
+            throw new ParserException("Unexpected tokens after parsing MASK:\n"+extra.toString());
+        return new SirCommand(numberBytes,tdi, tdo, mask);        
     }
 
 
