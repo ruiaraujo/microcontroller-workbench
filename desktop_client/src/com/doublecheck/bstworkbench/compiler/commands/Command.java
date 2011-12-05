@@ -35,7 +35,7 @@ public abstract class Command {
      * to check ofr invalid arguments.
      * @throws CompilerException
      */
-    public abstract List<Instruction> getInstruction(); 
+    public abstract List<Instruction> getInstructions(); 
     
     /**
      * 

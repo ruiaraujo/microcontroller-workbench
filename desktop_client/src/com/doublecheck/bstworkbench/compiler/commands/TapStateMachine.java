@@ -178,6 +178,17 @@ public class TapStateMachine {
         return ret;
     }
     
+    
+    public static List<Instruction> getResetInstructions(){
+        List<Instruction> ret = new ArrayList<Instruction>();
+        ret.add(TmsCommand.TMS_1);
+        ret.add(TmsCommand.TMS_1);
+        ret.add(TmsCommand.TMS_1);
+        ret.add(TmsCommand.TMS_1);
+        ret.add(TmsCommand.TMS_1);
+        return ret;
+    }
+    
     private static void cleanNodeState(){
         for ( String name :  possibleStates.keySet() )
             possibleStates.get(name).visited = false;

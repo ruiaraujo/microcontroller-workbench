@@ -50,6 +50,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 
 import com.doublecheck.bstworkbench.compiler.Compiler;
+import com.doublecheck.bstworkbench.compiler.Instruction;
 import com.doublecheck.bstworkbench.compiler.commands.Command;
 import com.doublecheck.bstworkbench.io.IOUtil;
 
@@ -441,6 +442,8 @@ public class Editor extends JFrame  implements  SyntaxConstants{
                 changeLog.append("Compiled successfully\n");
                 for ( Command s : compiler.getCommands() )
                     changeLog.append(s.toString()+'\n');
+                for ( Instruction s : compiler.getInstructions() )
+                    changeLog.append(s.toString()+'\n');
             }
         }
 
@@ -482,12 +485,10 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         public void actionPerformed(ActionEvent e) {
             if (chooser.showOpenDialog(Editor.this) == JFileChooser.APPROVE_OPTION) {
                 currentFile = chooser.getSelectedFile();
-                setTitle(TITLE + " - " + currentFile.getAbsolutePath());
                 textArea.setText(IOUtil.readFile(currentFile));
                 textArea.discardAllEdits();
-               // redoAction.updateRedoState();
-              //  undoAction.updateUndoState();
                 edited = false;
+                setTitle(TITLE + " - " + currentFile.getAbsolutePath());
             }
         }
     }

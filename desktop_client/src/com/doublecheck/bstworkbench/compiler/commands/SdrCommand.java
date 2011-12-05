@@ -101,7 +101,7 @@ public class SdrCommand extends Command {
         
         tok = tok.getNextToken();  // should be a whitespace
         if ( tok == null || tok.type == Token.NULL  )
-            return new SirCommand(numberBytes,tdi, tdo, mask);
+            return new SdrCommand(numberBytes,tdi, tdo, mask);
         
         
         //Checking for TDO ( optional )
@@ -116,12 +116,12 @@ public class SdrCommand extends Command {
         
         tok = tok.getNextToken(); // should be a whitespace
         if ( tok == null || tok.type == Token.NULL  )
-            return new SirCommand(numberBytes,tdi, tdo, mask);
+            return new SdrCommand(numberBytes,tdi, tdo, mask);
         
         //Checking for MASK( optional )
         tok = tok.getNextToken(); // byte count
         if ( tok == null || tok.type == Token.NULL  )
-            return new SirCommand(numberBytes,tdi, tdo, mask);
+            return new SdrCommand(numberBytes,tdi, tdo, mask);
 
         if ( !tok.getLexeme().equalsIgnoreCase(MASK) )
             throw new CompilerException("Unexpected token after TDO.");
@@ -133,7 +133,7 @@ public class SdrCommand extends Command {
         String extra = getLineEnd(tok);
         if ( extra.length() > 0 )
             throw new CompilerException("Unexpected tokens after parsing MASK:\n"+extra.toString());
-        return new SirCommand(numberBytes,tdi, tdo, mask);        
+        return new SdrCommand(numberBytes,tdi, tdo, mask);        
     }
 
     @Override
@@ -153,7 +153,7 @@ public class SdrCommand extends Command {
     }
 
     @Override
-    public List<Instruction> getInstruction() {
+    public List<Instruction> getInstructions() {
         TapStateMachine stateMachine = TapStateMachine.getInstance();
         List<Instruction> ret = new ArrayList<Instruction>();
         ret.addAll(stateMachine.moveToState("shift-dr"));
@@ -163,7 +163,7 @@ public class SdrCommand extends Command {
         ret.add(new Instruction(Command.TDI, numberBytes, tdi));
         if ( tdo != null )
         {
-            ret.add(new Instruction(Command.TDO, numberBytes, tdi));
+            ret.add(new Instruction(Command.TDO, numberBytes, tdo));
             ret.add(new Instruction(Command.MASK, numberBytes, mask));
 
         }

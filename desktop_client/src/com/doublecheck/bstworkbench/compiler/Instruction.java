@@ -21,7 +21,7 @@ public class Instruction {
     }
     @Override
     public String toString() {
-        return "Instruction [argument=" + argument + ", identifier="
+        return "Instruction [argument=" + Long.toHexString(argument) + ", identifier="
                 + identifier + ", numberBytes=" + numberBytes + "]";
     }
     

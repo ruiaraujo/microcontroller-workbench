@@ -8,6 +8,7 @@ import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.commands.Command;
 import com.doublecheck.bstworkbench.compiler.commands.SupportedOperations;
+import com.doublecheck.bstworkbench.compiler.commands.TapStateMachine;
 
 public class Compiler {
     private final List<Error> errors;
@@ -46,6 +47,7 @@ public class Compiler {
                         if ( com != null )
                         {  
                             com.checkConsistency();
+                            instructions.addAll(com.getInstructions());
                             commands.add(com);
                         }
                         else
@@ -60,6 +62,8 @@ public class Compiler {
                     break;
             }
         }
+        if ( !detectedErrors() )
+            instructions.addAll(0,TapStateMachine.getResetInstructions()); 
     }
  
     

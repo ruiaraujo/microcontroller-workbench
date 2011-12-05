@@ -66,7 +66,7 @@ public class TmsCommand extends Command {
     }
 
     @Override
-    public List<Instruction> getInstruction() {
+    public List<Instruction> getInstructions() {
         List<Instruction> ret = new ArrayList<Instruction>(1);
         if ( tmsState == 0 )
             ret.add(TMS_0);

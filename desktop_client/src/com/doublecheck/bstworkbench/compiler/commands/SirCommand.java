@@ -33,7 +33,7 @@ public class SirCommand extends SdrCommand {
     }
 
     @Override
-    public List<Instruction> getInstruction() {
+    public List<Instruction> getInstructions() {
         TapStateMachine stateMachine = TapStateMachine.getInstance();
         List<Instruction> ret = new ArrayList<Instruction>();
         ret.addAll(stateMachine.moveToState("shift-ir"));
@@ -43,7 +43,7 @@ public class SirCommand extends SdrCommand {
         ret.add(new Instruction(Command.TDI, numberBytes, tdi));
         if ( tdo != null )
         {
-            ret.add(new Instruction(Command.TDO, numberBytes, tdi));
+            ret.add(new Instruction(Command.TDO, numberBytes, tdo));
             ret.add(new Instruction(Command.MASK, numberBytes, mask));
 
         }

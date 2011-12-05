@@ -63,7 +63,7 @@ public class SeltapCommand extends Command {
     }
 
     @Override
-    public List<Instruction> getInstruction() {
+    public List<Instruction> getInstructions() {
         List<Instruction> ret = new ArrayList<Instruction>(1);
         ret.add(new Instruction(Command.SELTAP, 1, (long)tapNumber));
         return ret;
