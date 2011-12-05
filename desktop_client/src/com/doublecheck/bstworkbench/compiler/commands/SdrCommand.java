@@ -1,6 +1,6 @@
 package com.doublecheck.bstworkbench.compiler.commands;
 
-
+import java.util.ArrayList;
 import java.util.List;
 
 import org.fife.ui.rsyntaxtextarea.Token;
@@ -154,8 +154,20 @@ public class SdrCommand extends Command {
 
     @Override
     public List<Instruction> getInstruction() {
-        // TODO Auto-generated method stub
-        return null;
+        TapStateMachine stateMachine = TapStateMachine.getInstance();
+        List<Instruction> ret = new ArrayList<Instruction>();
+        ret.addAll(stateMachine.moveToState("shift-dr"));
+        int numberBytes = numberBits/8;
+        if ( numberBytes*8 < numberBits )
+            numberBytes++;
+        ret.add(new Instruction(Command.TDI, numberBytes, tdi));
+        if ( tdo != null )
+        {
+            ret.add(new Instruction(Command.TDO, numberBytes, tdi));
+            ret.add(new Instruction(Command.MASK, numberBytes, mask));
+
+        }
+        return ret;
     }
 
 }

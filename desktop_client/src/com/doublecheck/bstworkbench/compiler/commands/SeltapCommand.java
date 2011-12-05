@@ -65,7 +65,7 @@ public class SeltapCommand extends Command {
     @Override
     public List<Instruction> getInstruction() {
         List<Instruction> ret = new ArrayList<Instruction>(1);
-        ret.add(new Instruction(Command.SELTAP, 1, new BigInteger(Byte.toString(tapNumber), 10)));
+        ret.add(new Instruction(Command.SELTAP, 1, (long)tapNumber));
         return ret;
     }
 

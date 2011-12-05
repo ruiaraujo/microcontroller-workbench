@@ -51,14 +51,14 @@ public class StateCommand extends Command {
 
     @Override
     public void checkConsistency() throws CompilerException {
-        // TODO Do this method after
-        
+        if ( !TapStateMachine.isStateAllowed(state) )
+            throw new CompilerException("Invalid state!");
     }
 
     @Override
     public List<Instruction> getInstruction() {
-        // TODO Auto-generated method stub
-        return null;
+        TapStateMachine stateMachine = TapStateMachine.getInstance();
+        return stateMachine.moveToState(state);
     }
 
 

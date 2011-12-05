@@ -13,8 +13,8 @@ public class TmsCommand extends Command {
         
     private final byte tmsState;
     
-    protected static Instruction TMS_1 = new Instruction(Command.TMS, 1, new BigInteger("1"));
-    protected static Instruction TMS_0 = new Instruction(Command.TMS, 1, new BigInteger("0"));
+    protected static Instruction TMS_1 = new Instruction(Command.TMS, 1, 1L);
+    protected static Instruction TMS_0 = new Instruction(Command.TMS, 1, 0L);
     
     public TmsCommand(final byte state) {
         tmsState = state; 

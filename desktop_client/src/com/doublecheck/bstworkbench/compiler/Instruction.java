@@ -1,12 +1,10 @@
 package com.doublecheck.bstworkbench.compiler;
 
-import java.math.BigInteger;
-
 public class Instruction {
     private final int identifier;
     private final long numberBytes;
-    private final BigInteger argument;
-    public Instruction(int identifier, long numberBytes, BigInteger argument) {
+    private final Long argument;
+    public Instruction(int identifier, long numberBytes, Long argument) {
         super();
         this.identifier = identifier;
         this.numberBytes = numberBytes;
@@ -18,7 +16,7 @@ public class Instruction {
     public long getNumberBytes() {
         return numberBytes;
     }
-    public BigInteger getArgument() {
+    public Long getArgument() {
         return argument;
     }
     @Override
