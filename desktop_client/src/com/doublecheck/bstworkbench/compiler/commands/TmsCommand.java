@@ -1,12 +1,21 @@
 package com.doublecheck.bstworkbench.compiler.commands;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.CompilerException;
+import com.doublecheck.bstworkbench.compiler.Instruction;
 
 public class TmsCommand extends Command {
         
     private final byte tmsState;
+    
+    protected static Instruction TMS_1 = new Instruction(Command.TMS, 1, new BigInteger("1"));
+    protected static Instruction TMS_0 = new Instruction(Command.TMS, 1, new BigInteger("0"));
+    
     public TmsCommand(final byte state) {
         tmsState = state; 
     }
@@ -54,6 +63,16 @@ public class TmsCommand extends Command {
     public void checkConsistency() throws CompilerException {
         if ( tmsState != 0 && tmsState != 1 )
             throw new CompilerException("The numeric argument of TMS can only be 0 or 1");
+    }
+
+    @Override
+    public List<Instruction> getInstruction() {
+        List<Instruction> ret = new ArrayList<Instruction>(1);
+        if ( tmsState == 0 )
+            ret.add(TMS_0);
+        else if ( tmsState == 1  )
+            ret.add(TMS_1);
+        return ret;
     }
 
 

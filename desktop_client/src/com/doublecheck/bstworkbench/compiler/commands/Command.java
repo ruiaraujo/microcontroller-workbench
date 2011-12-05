@@ -1,9 +1,12 @@
 package com.doublecheck.bstworkbench.compiler.commands;
 
 
+import java.util.List;
+
 import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.CompilerException;
+import com.doublecheck.bstworkbench.compiler.Instruction;
 
 
 /**
@@ -27,6 +30,12 @@ public abstract class Command {
      */
     public abstract void checkConsistency() throws CompilerException;
     
+    /**
+     * After parsing correctly, the method should be invoked by the compiler
+     * to check ofr invalid arguments.
+     * @throws CompilerException
+     */
+    public abstract List<Instruction> getInstruction(); 
     
     /**
      * 

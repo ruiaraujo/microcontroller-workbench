@@ -21,5 +21,10 @@ public class Instruction {
     public BigInteger getArgument() {
         return argument;
     }
+    @Override
+    public String toString() {
+        return "Instruction [argument=" + argument + ", identifier="
+                + identifier + ", numberBytes=" + numberBytes + "]";
+    }
     
 }

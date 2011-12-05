@@ -1,9 +1,12 @@
 package com.doublecheck.bstworkbench.compiler.commands;
 
 
+import java.util.List;
+
 import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.CompilerException;
+import com.doublecheck.bstworkbench.compiler.Instruction;
 
 public class SdrCommand extends Command {
         
@@ -147,6 +150,12 @@ public class SdrCommand extends Command {
                 throw new CompilerException("MASK cannot fit in the number of bytes.");
         }
         
+    }
+
+    @Override
+    public List<Instruction> getInstruction() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

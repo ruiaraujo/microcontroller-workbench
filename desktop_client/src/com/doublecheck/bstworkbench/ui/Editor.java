@@ -331,10 +331,6 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         // Alt-c to compile
         key = (KeyStroke) compileAction.getValue(Action.ACCELERATOR_KEY);
         inputMap.put(key, compileAction);
-        
-        
-        
-
     }
 
     // Create the edit menu.
@@ -429,21 +425,21 @@ public class Editor extends JFrame  implements  SyntaxConstants{
                 changeLog.append("There is nothing to compile\n");
                 return;
             }
-            Compiler parser = new Compiler();
+            Compiler compiler = new Compiler();
             if ( changeLog.getText().length() != 0 )//get some space
                 changeLog.append("\n\n\n");
             changeLog.append("Compiling\n");
-            parser.parse(((RSyntaxDocument)textArea.getDocument()));
-            if ( parser.detectedErrors() )
+            compiler.parse(((RSyntaxDocument)textArea.getDocument()));
+            if ( compiler.detectedErrors() )
             {
-                for ( String s : parser.getListErrors() )
+                for ( String s : compiler.getListErrors() )
                     changeLog.append(s+'\n');
                 changeLog.append("Found errors while compiling\n");
             }
             else
             {
                 changeLog.append("Compiled successfully\n");
-                for ( Command s : parser.getCommands() )
+                for ( Command s : compiler.getCommands() )
                     changeLog.append(s.toString()+'\n');
             }
         }

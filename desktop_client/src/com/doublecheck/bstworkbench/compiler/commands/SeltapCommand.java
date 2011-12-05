@@ -1,9 +1,14 @@
 package com.doublecheck.bstworkbench.compiler.commands;
 
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.CompilerException;
+import com.doublecheck.bstworkbench.compiler.Instruction;
 
 public class SeltapCommand extends Command {
         
@@ -55,6 +60,13 @@ public class SeltapCommand extends Command {
     @Override
     public void checkConsistency() throws CompilerException {
         
+    }
+
+    @Override
+    public List<Instruction> getInstruction() {
+        List<Instruction> ret = new ArrayList<Instruction>(1);
+        ret.add(new Instruction(Command.SELTAP, 1, new BigInteger(Byte.toString(tapNumber), 10)));
+        return ret;
     }
 
 

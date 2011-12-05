@@ -12,9 +12,12 @@ import com.doublecheck.bstworkbench.compiler.commands.SupportedOperations;
 public class Compiler {
     private final List<Error> errors;
     private final List<Command> commands;
+    private final List<Instruction> instructions;
+    
     public Compiler(){
         errors = new ArrayList<Error>();
         commands = new ArrayList<Command>();
+        instructions = new ArrayList<Instruction>();
     }
     
     public void parse(RSyntaxDocument rSyntaxDocument){
@@ -86,5 +89,9 @@ public class Compiler {
 
     public List<Command> getCommands() {
         return commands;
+    }
+
+    public List<Instruction> getInstructions() {
+        return instructions;
     }
 }

@@ -1,8 +1,11 @@
 package com.doublecheck.bstworkbench.compiler.commands;
 
+import java.util.List;
+
 import org.fife.ui.rsyntaxtextarea.Token;
 
 import com.doublecheck.bstworkbench.compiler.CompilerException;
+import com.doublecheck.bstworkbench.compiler.Instruction;
 
 public class StateCommand extends Command {
         
@@ -50,6 +53,12 @@ public class StateCommand extends Command {
     public void checkConsistency() throws CompilerException {
         // TODO Do this method after
         
+    }
+
+    @Override
+    public List<Instruction> getInstruction() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 
