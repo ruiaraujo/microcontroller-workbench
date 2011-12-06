@@ -1,7 +1,6 @@
 package com.doublecheck.bstworkbench.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Event;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -39,7 +39,6 @@ import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.LanguageAwareCompletionProvider;
-import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -98,6 +97,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         AutoCompletion ac = new AutoCompletion(createCompletionProvider());
         ac.setListCellRenderer(new CCellRenderer());
         ac.setShowDescWindow(true);
+		ac.setParameterAssistanceEnabled(true);
         ac.install(textArea);
        
 
@@ -183,14 +183,25 @@ public class Editor extends JFrame  implements  SyntaxConstants{
      */
     private CompletionProvider createCodeCompletionProvider() {
 
-        // Add completions for the C standard library.
+        // Add completions for the BST.
         DefaultCompletionProvider cp = new DefaultCompletionProvider();
 
-       // Add some handy shorthand completions.
-        cp.addCompletion(new ShorthandCompletion(cp, "sir 0 tdi(0)",
-                            "sir 0 tdi(0)"));
-        cp.addCompletion(new ShorthandCompletion(cp, "sir 0 tdi(0) tdo(0) mask(0)",
-                            "sir 0 tdi(0) tdo(0) mask(0)"));
+		// First try loading resource (running from demo jar), then try
+		// accessing file (debugging in Eclipse).
+		ClassLoader cl = getClass().getClassLoader();
+		InputStream in = cl.getResourceAsStream("bst.xml");
+		try {
+			if (in!=null) {
+				cp.loadFromXML(in);
+				in.close();
+			}
+			else {
+				cp.loadFromXML(new File("bst.xml"));
+			}
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+
         return cp;
 
     }
@@ -221,7 +232,6 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 
         // Create the provider used when typing code.
         CompletionProvider codeCP = createCodeCompletionProvider();
-
 
         // The provider used when typing a comment.
         CompletionProvider commentCP = createCommentCompletionProvider();

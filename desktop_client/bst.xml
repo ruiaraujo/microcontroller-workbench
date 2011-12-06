@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<api language="BST">
+
+	<environment paramStartChar=" " paramEndChar=" " paramSeparator=" " terminal="\n" />
+
+	<keywords>
+
+<keyword name="sir" type="function"  definedIn="API v1">
+	<params>
+		<param type="int" name="nbits">
+			<desc>The number to bits to be pushed.</desc>
+		</param>
+		<param type="hexadecimal" name="tdi()">
+			<desc>The value to be pushed through TDI.</desc>
+		</param>
+	</params>
+	<desc><![CDATA[Pushes a value to the instruction register.]]></desc>
+</keyword>
+
+
+<keyword name="sir" type="function"  definedIn="API v1">
+	<params>
+		<param type="int" name="nbits">
+			<desc>The number to bits to be pushed.</desc>
+		</param>
+		<param type="hexadecimal" name="tdi()">
+			<desc>The value to be pushed through TDI.</desc>
+		</param>
+		<param type="hexadecimal" name="tdo()">
+			<desc>The expected value from TDO.</desc>
+		</param>
+		<param type="hexadecimal" name="mask()">
+			<desc><![CDATA[<b>(Optional)</b> A mask used when testing the value scanned from TDO.]]></desc>
+		</param>
+		
+	</params>
+	<desc><![CDATA[Pushes a value to the instruction register and checks the value scanned from TDO.]]></desc>
+</keyword>
+
+<keyword name="sdr" type="function"  definedIn="API v1">
+	<params>
+		<param type="int" name="nbits">
+			<desc>The number to bits to be pushed.</desc>
+		</param>
+		<param type="hexadecimal" name="tdi()">
+			<desc>The value to be pushed through TDI.</desc>
+		</param>
+	</params>
+	<desc><![CDATA[Pushes a value to the data register.]]></desc>
+</keyword>
+
+
+<keyword name="sdr" type="function"  definedIn="API v1">
+	<params>
+		<param type="int" name="nbits">
+			<desc>The number to bits to be pushed.</desc>
+		</param>
+		<param type="hexadecimal" name="tdi()">
+			<desc>The value to be pushed through TDI.</desc>
+		</param>
+		<param type="hexadecimal" name="tdo()">
+			<desc>The expected value from TDO.</desc>
+		</param>
+		<param type="hexadecimal" name="mask()">
+			<desc><![CDATA[<b>(Optional)</b> A mask used when testing the value scanned from TDO.]]></desc>
+		</param>
+		
+	</params>
+	<desc><![CDATA[Pushes a value to the data register and checks the value scanned from TDO.]]></desc>
+</keyword>
+
+
+<keyword name="seltap" type="function"  definedIn="API v1">
+	<params>
+		<param type="int" name="tapId">
+			<desc>The tap controller number.</desc>
+		</param>
+		
+	</params>
+	<desc>Select the TAP controller being used on the board.</desc>
+</keyword>
+
+<keyword name="tms" type="function"  definedIn="API v1">
+	<params>
+		<param type="int" name="tapId">
+			<desc>The TMS value, can only be 0 or 1.</desc>
+		</param>
+		
+	</params>
+	<desc>Force a TMS value.</desc>
+</keyword>
+
+<keyword name="state" type="function"  definedIn="API v1">
+	<params>
+		<param type="string" name="stateName">
+			<desc>The name of the state.</desc>
+		</param>
+		
+	</params>
+	<desc>Sets the TAP controller to the state specified in the argument.</desc>
+</keyword>
+
+<keyword name="reset" type="constant" definedIn="API v1">
+	<desc>State reset.</desc>
+</keyword>
+<keyword name="idle" type="constant" definedIn="API v1">
+	<desc>State idle.</desc>
+</keyword>
+<keyword name="select-dr" type="constant" definedIn="API v1">
+	<desc>State select-dr.</desc>
+</keyword>
+<keyword name="capture-dr" type="constant" definedIn="API v1">
+	<desc>State capture-dr.</desc>
+</keyword>
+<keyword name="shift-dr" type="constant" definedIn="API v1">
+	<desc>State shift-dr.</desc>
+</keyword>
+<keyword name="exit1-dr" type="constant" definedIn="API v1">
+	<desc>State exit1-dr.</desc>
+</keyword>
+<keyword name="pause" type="constant" definedIn="API v1">
+	<desc>State pause.</desc>
+</keyword>
+<keyword name="exit2-dr" type="constant" definedIn="API v1">
+	<desc>State exit2-dr.</desc>
+</keyword>
+<keyword name="update-dr" type="constant" definedIn="API v1">
+	<desc>State update-dr.</desc>
+</keyword>
+
+
+<keyword name="select-ir" type="constant" definedIn="API v1">
+	<desc>State select-ir.</desc>
+</keyword>
+<keyword name="capture-ir" type="constant" definedIn="API v1">
+	<desc>State capture-ir.</desc>
+</keyword>
+<keyword name="shift-ir" type="constant" definedIn="API v1">
+	<desc>State shift-ir.</desc>
+</keyword>
+<keyword name="exit1-ir" type="constant" definedIn="API v1">
+	<desc>State exit1-ir.</desc>
+</keyword>
+<keyword name="pause" type="constant" definedIn="API v1">
+	<desc>State pause.</desc>
+</keyword>
+<keyword name="exit2-ir" type="constant" definedIn="API v1">
+	<desc>State exit2-ir.</desc>
+</keyword>
+<keyword name="update-ir" type="constant" definedIn="API v1">
+	<desc>State update-ir.</desc>
+</keyword>
+
+	</keywords>
+
+</api>
