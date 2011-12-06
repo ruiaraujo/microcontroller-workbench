@@ -3,9 +3,9 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="img"/>
 	<classpathentry kind="src" path="themes"/>
+	<classpathentry kind="src" path="lang"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="libs/nrjavaserial-3.7.5.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/RSyntaxTextArea"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/AutoComplete"/>
+	<classpathentry kind="lib" path="libs/rsyntaxtextarea.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
