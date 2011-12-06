@@ -12,11 +12,11 @@ public class TestStateMachine {
      */
     public static void main(String[] args) {
         TapStateMachine machine = TapStateMachine.getInstance();
-        List<Instruction> list  = machine.moveToState("pause-ir");
+        List<Instruction> list  = machine.moveToState("shift-ir");
         System.out.println(Arrays.toString(list.toArray()));
-        list  = machine.moveToState("pause-ir");
+        list  = machine.moveToState("shift-ir");
         System.out.println(Arrays.toString(list.toArray()));
-        list  = machine.moveToState("select-ir");
+        list  = machine.moveToState("shift-dr");
         System.out.println(Arrays.toString(list.toArray()));
     }
 

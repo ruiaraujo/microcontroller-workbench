@@ -167,6 +167,7 @@ public class SdrCommand extends Command {
             ret.add(new Instruction(Command.MASK, numberBytes, mask));
 
         }
+        ret.add(new Instruction(Command.TMS0, 1, (long)numberBits));
         return ret;
     }
 

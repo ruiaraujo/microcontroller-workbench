@@ -1,6 +1,5 @@
 package com.doublecheck.bstworkbench.compiler.commands;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +12,8 @@ public class TmsCommand extends Command {
         
     private final byte tmsState;
     
-    protected static Instruction TMS_1 = new Instruction(Command.TMS, 1, 1L);
-    protected static Instruction TMS_0 = new Instruction(Command.TMS, 1, 0L);
+    protected static Instruction TMS_1 = new Instruction(Command.TMS1, 1, 1L);
+    protected static Instruction TMS_0 = new Instruction(Command.TMS0, 1, 1L);
     
     public TmsCommand(final byte state) {
         tmsState = state; 
@@ -68,10 +67,17 @@ public class TmsCommand extends Command {
     @Override
     public List<Instruction> getInstructions() {
         List<Instruction> ret = new ArrayList<Instruction>(1);
+        TapStateMachine stateMachine = TapStateMachine.getInstance();
         if ( tmsState == 0 )
+        {
+            stateMachine.updateState(TMS_0);
             ret.add(TMS_0);
+        }
         else if ( tmsState == 1  )
+        {
+            stateMachine.updateState(TMS_1);
             ret.add(TMS_1);
+        }
         return ret;
     }
 

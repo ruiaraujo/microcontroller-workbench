@@ -16,8 +16,8 @@ import com.doublecheck.bstworkbench.compiler.Instruction;
  *
  */
 public abstract class Command {
-    
-    protected final static byte TMS = 1;
+    protected final static byte TMS0 = 0;
+    protected final static byte TMS1 = 1;
     protected final static byte TDI = 2;
     protected final static byte TDO = 3;
     protected final static byte MASK = 4;
