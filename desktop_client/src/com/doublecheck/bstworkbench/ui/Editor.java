@@ -37,6 +37,7 @@ import javax.swing.event.UndoableEditListener;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.CompletionProviderBase;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.LanguageAwareCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
@@ -99,7 +100,10 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         ac.setShowDescWindow(true);
 		ac.setParameterAssistanceEnabled(true);
         ac.install(textArea);
-       
+        ac.setAutoCompleteEnabled(true);
+        ac.setAutoActivationDelay(500);
+        ac.setAutoActivationEnabled(true);
+        ac.setAutoCompleteSingleChoices(true);
 
         chooser = new JFileChooser(System.getProperty("user.dir")) {
             @Override
@@ -201,7 +205,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-
+		cp.setAutoActivationRules(true,"");
         return cp;
 
     }
