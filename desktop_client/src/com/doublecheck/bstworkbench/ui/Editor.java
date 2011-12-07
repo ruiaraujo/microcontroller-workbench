@@ -85,7 +85,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         
         
         textArea = createTextArea();
-        textArea.setSyntaxEditingStyle(SYNTAX_STYLE_BST);
+        textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SVF);
         scrollPane = new RTextScrollPane(textArea, true);
         Gutter gutter = scrollPane.getGutter();
         gutter.setBookmarkingEnabled(true);
@@ -108,6 +108,9 @@ public class Editor extends JFrame  implements  SyntaxConstants{
             @Override
             public void approveSelection() {
                 File f = getSelectedFile();
+                String path = f.getAbsolutePath();
+                if ( !path.endsWith("svf") )
+                    f = new File(path+".svf");
                 if (f.exists() && getDialogType() == SAVE_DIALOG) {
                     int result = JOptionPane.showConfirmDialog(this,
                             "The file exists, overwrite?", "Existing file",
@@ -126,7 +129,8 @@ public class Editor extends JFrame  implements  SyntaxConstants{
                 super.approveSelection();
             }
         };
-
+        chooser.addChoosableFileFilter(new EasyFileFilter(new String[]{"svf"}, "Serial Vector Format"));
+            
 
 
         // Create the text area for the status log and configure it.
@@ -537,6 +541,9 @@ public class Editor extends JFrame  implements  SyntaxConstants{
             }
             if (chooser.showSaveDialog(Editor.this) == JFileChooser.APPROVE_OPTION) {
                 currentFile = chooser.getSelectedFile();
+                String path = currentFile.getAbsolutePath();
+                if ( !path.endsWith("svf") )
+                    currentFile = new File(path+".svf");
                 if ( IOUtil.saveFile(currentFile, textArea.getText()))
                 {
                     edited = false;

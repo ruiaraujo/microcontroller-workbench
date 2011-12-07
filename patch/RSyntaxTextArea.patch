@@ -7,7 +7,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/folding/FoldParserManager.java
  		Map map = new HashMap();
  		CFoldParserSupplier cfps = new CFoldParserSupplier();
 -
-+        map.put(SYNTAX_STYLE_BST,               cfps);
++        map.put(SYNTAX_STYLE_SVF,               cfps);
  		map.put(SYNTAX_STYLE_C,					cfps);
  		map.put(SYNTAX_STYLE_CPLUSPLUS,			cfps);
  		map.put(SYNTAX_STYLE_CSHARP,			cfps);
@@ -15,18 +15,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java
 ===================================================================
 --- src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java	(revision 350)
 +++ src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java	(working copy)
-@@ -64,12 +64,18 @@
- 	 * Style for highlighting BBCode.
- 	 */
- 	public static final String SYNTAX_STYLE_BBCODE			= "text/bbcode";
-+	
-+	
-+    /**
-+     * Style for highlighting BST Workbench code.
-+     */
-+    public static final String SYNTAX_STYLE_BST          = "text/bst";
- 
- 
+@@ -69,7 +69,7 @@
  	/**
  	 * Style for highlighting C.
  	 */
@@ -35,15 +24,29 @@ Index: src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java
  
  
  	/**
-Index: src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java
+@@ -209,7 +209,13 @@
+ 	 */
+ 	public static final String SYNTAX_STYLE_SQL			= "text/sql";
+ 
++	
++    /**
++     * Style for highlighting BST Workbench code.
++     */
++    public static final String SYNTAX_STYLE_SVF          = "text/svf";
+ 
++
+ 	/**
+ 	 * Style for highlighting Tcl.
+ 	 */
+Index: src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java
 ===================================================================
---- src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java	(revision 0)
-+++ src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java	(revision 0)
+--- src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java	(revision 0)
++++ src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java	(revision 0)
 @@ -0,0 +1,528 @@
 +/*
 + * 03/07/2004
 + *
-+ * BstTokenMaker.java - Scanner for BST Workbench files.
++ * SVFTokenMaker.java - Scanner for BST Workbench files.
 + * Copyright (C) 2011 Rui Araujo
 + *
 + * This library is free software; you can redistribute it and/or
@@ -82,7 +85,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java
 + * @author Rui Araujo
 + * @version 0.1
 + */
-+public class BstTokenMaker extends AbstractTokenMaker {
++public class SVFTokenMaker extends AbstractTokenMaker {
 +
 +	private int currentTokenStart;
 +	private int currentTokenType;
@@ -90,7 +93,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java
 +	/**
 +	 * Constructor.
 +	 */
-+	public BstTokenMaker() {
++	public SVFTokenMaker() {
 +		super();	// Initializes tokensToHighlight.
 +	}
 +
@@ -144,7 +147,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java
 +	 *         enabled.
 +	 */
 +	public boolean getMarkOccurrencesOfTokenType(int type) {
-+		return type==Token.IDENTIFIER || type==Token.VARIABLE;
++		return type==Token.IDENTIFIER;
 +	}
 +
 +
@@ -159,10 +162,10 @@ Index: src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java
 +    }
 +    
 +	/**
-+	 * Returns the words to highlight for Bst files.
++	 * Returns the words to highlight for SVF files.
 +	 *
 +	 * @return A <code>TokenMap</code> containing the words to highlight for
-+	 *         Bst batch files.
++	 *         SVF files.
 +	 * @see org.fife.ui.rsyntaxtextarea.AbstractTokenMaker#getWordsToHighlight
 +	 */
 +	public TokenMap getWordsToHighlight() {
@@ -570,7 +573,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java
 +}
 \ No newline at end of file
 
-Property changes on: src/org/fife/ui/rsyntaxtextarea/modes/BstTokenMaker.java
+Property changes on: src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java
 ___________________________________________________________________
 Added: svn:mime-type
    + text/plain
@@ -579,14 +582,14 @@ Index: src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java
 ===================================================================
 --- src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java	(revision 350)
 +++ src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java	(working copy)
-@@ -56,6 +56,7 @@
- 		map.put(SYNTAX_STYLE_ACTIONSCRIPT,		pkg + "ActionScriptTokenMaker");
- 		map.put(SYNTAX_STYLE_ASSEMBLER_X86,		pkg + "AssemblerX86TokenMaker");
- 		map.put(SYNTAX_STYLE_BBCODE,			pkg + "BBCodeTokenMaker");
-+		map.put(SYNTAX_STYLE_BST,               pkg + "BstTokenMaker");
- 		map.put(SYNTAX_STYLE_C,					pkg + "CTokenMaker");
- 		map.put(SYNTAX_STYLE_CLOJURE,			pkg + "ClojureTokenMaker");
- 		map.put(SYNTAX_STYLE_CPLUSPLUS,			pkg + "CPlusPlusTokenMaker");
+@@ -80,6 +80,7 @@
+ 		map.put(SYNTAX_STYLE_SAS,				pkg + "SASTokenMaker");
+ 		map.put(SYNTAX_STYLE_SCALA,				pkg + "ScalaTokenMaker");
+ 		map.put(SYNTAX_STYLE_SQL,				pkg + "SQLTokenMaker");
++        map.put(SYNTAX_STYLE_SVF,               pkg + "SVFTokenMaker");
+ 		map.put(SYNTAX_STYLE_TCL,				pkg + "TclTokenMaker");
+ 		map.put(SYNTAX_STYLE_UNIX_SHELL,		pkg + "UnixShellTokenMaker");
+ 		map.put(SYNTAX_STYLE_WINDOWS_BATCH,		pkg + "WindowsBatchTokenMaker");
 Index: src/org/fife/ui/rsyntaxtextarea/RSyntaxDocument.java
 ===================================================================
 --- src/org/fife/ui/rsyntaxtextarea/RSyntaxDocument.java	(revision 350)
