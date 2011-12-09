@@ -1,6 +1,6 @@
 Index: src/org/fife/ui/rsyntaxtextarea/folding/FoldParserManager.java
 ===================================================================
---- src/org/fife/ui/rsyntaxtextarea/folding/FoldParserManager.java	(revision 350)
+--- src/org/fife/ui/rsyntaxtextarea/folding/FoldParserManager.java	(revision 353)
 +++ src/org/fife/ui/rsyntaxtextarea/folding/FoldParserManager.java	(working copy)
 @@ -99,7 +99,7 @@
  
@@ -13,7 +13,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/folding/FoldParserManager.java
  		map.put(SYNTAX_STYLE_CSHARP,			cfps);
 Index: src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java
 ===================================================================
---- src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java	(revision 350)
+--- src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java	(revision 353)
 +++ src/org/fife/ui/rsyntaxtextarea/SyntaxConstants.java	(working copy)
 @@ -69,7 +69,7 @@
  	/**
@@ -42,7 +42,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java
 ===================================================================
 --- src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java	(revision 0)
 +++ src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java	(revision 0)
-@@ -0,0 +1,528 @@
+@@ -0,0 +1,529 @@
 +/*
 + * 03/07/2004
 + *
@@ -179,6 +179,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java
 +		tokenMap.put("seltap",		reservedWord);
 +		tokenMap.put("tms",			reservedWord);
 +		tokenMap.put("state",		reservedWord);
++		tokenMap.put("runtest",		reservedWord);
 +		tokenMap.put("tdi",			argumentName);
 +		tokenMap.put("tdo",			argumentName);
 +		tokenMap.put("mask",		argumentName);
@@ -572,15 +573,9 @@ Index: src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java
 +
 +}
 \ No newline at end of file
-
-Property changes on: src/org/fife/ui/rsyntaxtextarea/modes/SVFTokenMaker.java
-___________________________________________________________________
-Added: svn:mime-type
-   + text/plain
-
 Index: src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java
 ===================================================================
---- src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java	(revision 350)
+--- src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java	(revision 353)
 +++ src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java	(working copy)
 @@ -80,6 +80,7 @@
  		map.put(SYNTAX_STYLE_SAS,				pkg + "SASTokenMaker");
@@ -592,7 +587,7 @@ Index: src/org/fife/ui/rsyntaxtextarea/DefaultTokenMakerFactory.java
  		map.put(SYNTAX_STYLE_WINDOWS_BATCH,		pkg + "WindowsBatchTokenMaker");
 Index: src/org/fife/ui/rsyntaxtextarea/RSyntaxDocument.java
 ===================================================================
---- src/org/fife/ui/rsyntaxtextarea/RSyntaxDocument.java	(revision 350)
+--- src/org/fife/ui/rsyntaxtextarea/RSyntaxDocument.java	(revision 353)
 +++ src/org/fife/ui/rsyntaxtextarea/RSyntaxDocument.java	(working copy)
 @@ -349,7 +349,9 @@
  		return tokenMaker.getShouldIndentNextLineAfter(t);
