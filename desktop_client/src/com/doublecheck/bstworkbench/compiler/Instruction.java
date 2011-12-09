@@ -38,7 +38,7 @@ public class Instruction {
         return buf.array();
     }
     
-    public static byte[] getBytes(Long val, final int numberBytes)
+    private static byte[] getBytes(Long val, final int numberBytes)
     {
     	byte [] line = new byte[numberBytes];
     	for ( int i = numberBytes -1 , j = 0; i >= 0 ; ++j , --i )

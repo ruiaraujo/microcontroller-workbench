@@ -41,7 +41,8 @@ public class Compiler {
                 case Token.COMMENT_EOL:  
                 case Token.NULL: 
                 case Token.WHITESPACE: break;
-                case Token.RESERVED_WORD:    {
+                case Token.RESERVED_WORD:
+                {
                     try {
                         Command  com = SupportedOperations.parseLine(tok);
                         if ( com != null )

@@ -10,7 +10,7 @@ import com.doublecheck.bstworkbench.compiler.Instruction;
 
 
 /**
- * Abastract class which holds some common methods from
+ * Abstract class which holds some common methods from
  * the commands
  * @author ruka
  *
@@ -22,19 +22,15 @@ public abstract class Command {
     protected final static byte TDO = 3;
     protected final static byte MASK = 4;
     protected final static byte SELTAP = 5;
+    protected final static byte RUNTEST = 6;
     
     /**
      * After parsing correctly, the method should be invoked by the compiler
-     * to check ofr invalid arguments.
+     * to check for invalid arguments.
      * @throws CompilerException
      */
     public abstract void checkConsistency() throws CompilerException;
     
-    /**
-     * After parsing correctly, the method should be invoked by the compiler
-     * to check ofr invalid arguments.
-     * @throws CompilerException
-     */
     public abstract List<Instruction> getInstructions(); 
     
     /**
@@ -119,5 +115,20 @@ public abstract class Command {
         if ( maskStr.toString().length() == 0 )
             return 0L;
         return Long.parseLong(maskStr.toString(),2);
+    }
+    
+    /**
+     * Returns the maximum number in decimal format for a certain number of bits.
+     * @param numberBits number of bits
+     * @return the maximum number for a number of bits
+     */
+    protected static byte getNumberBytes( final long number ){
+    	String longStr = Long.toBinaryString(number).replace('0', '1'); ;
+    	int numberBits = longStr.length();
+    	byte numberBytes = (byte) (numberBits / 8);
+    	if ( numberBytes * 8 < numberBits )
+    		numberBytes++;
+    	return numberBytes;
+    	
     }
 }
