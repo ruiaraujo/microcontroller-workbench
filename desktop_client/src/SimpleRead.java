@@ -18,10 +18,8 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
             portId = (CommPortIdentifier) portList.nextElement();
             if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
                 System.out.println("serial " + portId.getName() );
-
-                 if (portId.getName().equals("COM9")) {
-
-			//                if (portId.getName().equals("/dev/term/a")) {
+                // if (portId.getName().equals("COM9")) {
+                if (portId.getName().equals("/dev/ttyUSB0")) {
                     SimpleRead reader = new SimpleRead();
                 }
             }
