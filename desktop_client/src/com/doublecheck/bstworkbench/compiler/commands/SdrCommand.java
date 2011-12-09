@@ -156,8 +156,10 @@ public class SdrCommand extends Command {
     public List<Instruction> getInstructions() {
         TapStateMachine stateMachine = TapStateMachine.getInstance();
         List<Instruction> ret = new ArrayList<Instruction>();
+
+        ret.addAll(stateMachine.moveToState("capture-dr"));
         ret.addAll(stateMachine.moveToState("shift-dr"));
-        int numberBytes = numberBits/8;
+        byte numberBytes = (byte)(numberBits/8);
         if ( numberBytes*8 < numberBits )
             numberBytes++;
         ret.add(new Instruction(Command.TDI, numberBytes, tdi));
@@ -167,7 +169,9 @@ public class SdrCommand extends Command {
             ret.add(new Instruction(Command.MASK, numberBytes, mask));
 
         }
-        ret.add(new Instruction(Command.TMS0, 1, (long)numberBits));
+        ret.add(new Instruction(Command.TMS0, (byte)1, (long)numberBits-1));
+        ret.addAll(stateMachine.moveToState("update-dr"));
+        ret.addAll(stateMachine.moveToState("idle"));
         return ret;
     }
 

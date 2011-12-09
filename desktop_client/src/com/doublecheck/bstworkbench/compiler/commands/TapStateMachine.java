@@ -129,14 +129,14 @@ public class TapStateMachine {
                 if ( count > 0 )
                 {
                     instructions.add(new Instruction(lastDigit == 0 ? Command.TMS0
-                            : Command.TMS1, 1, (long) count));
+                            : Command.TMS1, (byte)1, (long) count));
                 }
                 lastDigit = i;
                 count = 1;
             }
         }
         instructions.add(new Instruction(lastDigit == 0 ? Command.TMS0
-                : Command.TMS1, 1, (long) count));
+                : Command.TMS1, (byte)1, (long) count));
         return instructions;
     }
 
@@ -191,14 +191,8 @@ public class TapStateMachine {
         return ret;
     }
 
-    public static List<Instruction> getResetInstructions() {
-        List<Instruction> ret = new ArrayList<Instruction>();
-        ret.add(TmsCommand.TMS_1);
-        ret.add(TmsCommand.TMS_1);
-        ret.add(TmsCommand.TMS_1);
-        ret.add(TmsCommand.TMS_1);
-        ret.add(TmsCommand.TMS_1);
-        return ret;
+    public static Instruction getResetInstructions() {
+        return new Instruction(Command.TMS1, (byte)1, 5L);
     }
 
     private static void cleanNodeState() {

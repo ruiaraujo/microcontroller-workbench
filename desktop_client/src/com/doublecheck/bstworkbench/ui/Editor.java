@@ -7,7 +7,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -459,11 +463,30 @@ public class Editor extends JFrame  implements  SyntaxConstants{
                 changeLog.append("Compiled successfully\n");
                 for ( Command s : compiler.getCommands() )
                     changeLog.append(s.toString()+'\n');
+                FileOutputStream os = null;
+                try {
+					os = new FileOutputStream(new File("compiled.o"));
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
+				}
+				
                 for ( Instruction s : compiler.getInstructions() )
+                {
                     changeLog.append(s.toString()+'\n');
+                    try {
+						os.write(s.toFile());
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+                }
+                try {
+                	os.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+
             }
         }
-
     }
     
     

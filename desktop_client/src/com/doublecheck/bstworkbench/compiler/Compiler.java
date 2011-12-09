@@ -63,7 +63,7 @@ public class Compiler {
             }
         }
         if ( !detectedErrors() )
-            instructions.addAll(0,TapStateMachine.getResetInstructions()); 
+            instructions.add(0,TapStateMachine.getResetInstructions()); 
     }
  
     

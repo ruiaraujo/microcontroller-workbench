@@ -12,8 +12,8 @@ public class TmsCommand extends Command {
         
     private final byte tmsState;
     
-    protected static Instruction TMS_1 = new Instruction(Command.TMS1, 1, 1L);
-    protected static Instruction TMS_0 = new Instruction(Command.TMS0, 1, 1L);
+    protected static Instruction TMS_1 = new Instruction(Command.TMS1, (byte) 1, 1L);
+    protected static Instruction TMS_0 = new Instruction(Command.TMS0, (byte) 1, 1L);
     
     public TmsCommand(final byte state) {
         tmsState = state; 
