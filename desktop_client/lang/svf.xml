@@ -15,9 +15,17 @@
 			<desc>The value to be pushed through TDI.</desc>
 		</param>
 	</params>
-	<desc><![CDATA[Pushes a value to the instruction register.]]></desc>
+	<desc>Pushes a value to the instruction register.</desc>
 </keyword>
 
+<keyword name="runtest" type="function"  definedIn="API v1">
+	<params>
+		<param type="int" name="nclocks">
+			<desc>The number of clocks to be run in the idle state.</desc>
+		</param>
+	</params>
+	<desc>Activates a automate test present in the IC.</desc>
+</keyword>
 
 <keyword name="sir" type="function"  definedIn="API v1">
 	<params>
@@ -47,7 +55,7 @@
 			<desc>The value to be pushed through TDI.</desc>
 		</param>
 	</params>
-	<desc><![CDATA[Pushes a value to the data register.]]></desc>
+	<desc>Pushes a value to the data register.</desc>
 </keyword>
 
 
@@ -67,7 +75,7 @@
 		</param>
 		
 	</params>
-	<desc><![CDATA[Pushes a value to the data register and checks the value scanned from TDO.]]></desc>
+	<desc>Pushes a value to the data register and checks the value scanned from TDO.</desc>
 </keyword>
 
 
