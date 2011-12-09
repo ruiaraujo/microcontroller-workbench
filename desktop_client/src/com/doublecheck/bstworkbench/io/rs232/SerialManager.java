@@ -30,10 +30,10 @@ public class SerialManager implements MicrocontrollerManager, SerialPortEventLis
 	            portId = (CommPortIdentifier) portList.nextElement();
 	            if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
 	                System.out.println("serial " + portId.getName() );
+	                break;
 	                // if (portId.getName().equals("COM9")) {
-	                if (portId.getName().equals("/dev/ttyUSB0")) {
-	                    SerialManager reader = new SerialManager();
-	                }
+	                //if (portId.getName().equals("/dev/ttyUSB0")) {
+	                //}
 	            }
 	        }
 	        try {

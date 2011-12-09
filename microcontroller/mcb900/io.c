@@ -2,9 +2,9 @@
 #include <string.h>
 #include <REG9351.H>			// register definition	
 
-#define TBUF_SIZE	128		/* DO NOT CHANGE */
+#define TBUF_SIZE	48		/* DO NOT CHANGE */
 
-static char xdata tbuf [TBUF_SIZE];
+static char tbuf [TBUF_SIZE];
 
 static volatile unsigned char t_in = 0;
 static volatile unsigned char t_out = 0;
@@ -19,12 +19,6 @@ void wait(void){
 	}
 }
 
-void wait_a_lot(void){
-	int i = 0;
-	for (; i < 5000; i++)  {  /* Delay for 100 Counts */
-		;                       /* call wait function */
-	}
-}
 
 char puthexdigit(unsigned char val){
 	if ( val < 10 )
@@ -133,7 +127,7 @@ char putchar ( char character)
 	Add the data to the transmit buffer.  If the
 	transmit interrupt is disabled, then enable it.
 	------------------------------------------------*/
-	EA = 0;                         /* Disable Interrupts */
+//	EA = 0;                         /* Disable Interrupts */
 	
 	tbuf [t_in++] = character;
 	
@@ -143,7 +137,7 @@ char putchar ( char character)
 		TI = 1;			/* enable it */
 	}
 	
-	EA = 1;                         /* Enable Interrupts */
+//	EA = 1;                         /* Enable Interrupts */
 	
 	return (0);
 

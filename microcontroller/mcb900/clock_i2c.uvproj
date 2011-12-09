@@ -367,6 +367,16 @@
               <FileType>5</FileType>
               <FilePath>.\io.h</FilePath>
             </File>
+            <File>
+              <FileName>bs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\bs.c</FilePath>
+            </File>
+            <File>
+              <FileName>bs.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\bs.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

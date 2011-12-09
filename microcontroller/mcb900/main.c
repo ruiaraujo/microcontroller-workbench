@@ -4,13 +4,30 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "io.h"
+#include "bs.h"
 
 
+#define INI 0
+#define REC_INSTR 1
+#define WAITING 2
 
-unsigned char state;
+#define PARSING_INSTR 4
+#define PARSING_NARGS 5
+#define PARSING_ARG 6
+#define RUN 7
+
+#define PARSING_TAMARG 9
+#define FIM 10
+
+#define COD_PROG_INIT 'p'
+
 //#define DEBUG 1		 
 
 
+int ptr=0;
+unsigned char tam_arg =0;
+static unsigned char state;
+static unsigned char response;
 
 void main()
 {
@@ -24,32 +41,78 @@ void main()
 	P2M1 = 0;
 	P2M2 = 0x0;
 	P2 = 0; // clean LED
-	 
+	TMOD = 0x11;
 	com_initialize();
 	EA = 1;
 	
+	state = WAITING;
+
 	while(1)
 	{
-		;
+		if(state == RUN){
+			run();
+		};
 	}
-}
-void timer0 (void) interrupt 1  {
-
 }
 void serial (void) interrupt 4  {
 
-	char key = 0;
-	if ( TI != 0 )
-	{
+	char key = 0; 
+	
+	if ( TI != 0 )							 
+	{					 
 		TI = 0;
 		send_more();
-	}
+	} 
 	if ( RI != 0 )
 	{
 		key = SBUF;
 		RI = 0;
-		putchar(key); //if the buffer is full, we don't care
+		if ( key < 10 )
+			putdigit(key);
+		else
+			putchar(key); //if the buffer is full, we don't care
+		if(state == WAITING){
+			switch(key){
+				case COD_PROG_INIT: putstring("ola"); state=INI;ptr = 0; break;
+				case 'r': state=RUN; break;
+			}
+		}
 		
-	}	 
+		else if(state == INI){								 
+		 		if(key==':') {	//TODO:KILL this 
+					state = PARSING_INSTR; 
+				}
+				if ( key == 'f' )
+				{
+					 state=WAITING;
+					 update_prog_size(ptr);
+				}
+				
+		}
+			
+
+															
+		else if(state == PARSING_INSTR){
+		   		buffer[ptr++]=key;
+				state = PARSING_TAMARG;	
+		}
+		else if(state ==  PARSING_TAMARG){
+				tam_arg = key;
+				buffer[ptr++]=key;
+				state = PARSING_ARG;
+		}
+
+		else if(state == PARSING_ARG){
+				buffer[ptr++]=key;
+				--tam_arg;
+				if( tam_arg <= 0 ){
+					state=INI;	
+				}	
+		}
+		
+
+		
+	}
+	 
 
 }

@@ -72,7 +72,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
     private JTextArea changeLog;
 
     private CompileAction compileAction;
-    private CompileAction uploadAction;
+    private UploadAction uploadAction;
 
     // Simple file management choices
     private final JFileChooser chooser;
@@ -91,7 +91,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         saveFileAction = new SaveFileAction(false);
         saveFileAsAction = new SaveFileAction(true);
         newFileAction = new NewFileAction();
-        
+        uploadAction = new UploadAction();
         
         textArea = createTextArea();
         textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SVF);
@@ -288,7 +288,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         layout.setAutoCreateContainerGaps(true);
         final JButton compile = new JButton(compileAction);
         
-        final JButton upload = new JButton("Upload"); 
+        final JButton upload = new JButton(uploadAction); 
         final JButton run = new JButton("Run");
         run.setEnabled(false);
         final JButton step = new JButton("Step ");
