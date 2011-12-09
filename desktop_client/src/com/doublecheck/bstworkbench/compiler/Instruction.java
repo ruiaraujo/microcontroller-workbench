@@ -31,7 +31,7 @@ public class Instruction {
     public byte[] toFile() {
         ByteBuffer buf = ByteBuffer.allocate(3+numberBytes);
         buf.order(ByteOrder.BIG_ENDIAN);
-        buf.put((byte)58);
+        buf.put((byte) ':');
         buf.put(identifier);
         buf.put(numberBytes);
         buf.put(getBytes(argument, numberBytes));

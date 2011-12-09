@@ -15,6 +15,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -56,6 +59,7 @@ import com.doublecheck.bstworkbench.compiler.Compiler;
 import com.doublecheck.bstworkbench.compiler.Instruction;
 import com.doublecheck.bstworkbench.compiler.commands.Command;
 import com.doublecheck.bstworkbench.io.IOUtil;
+import com.doublecheck.bstworkbench.io.rs232.SerialManager;
 
 @SuppressWarnings("serial")
 public class Editor extends JFrame  implements  SyntaxConstants{
@@ -67,7 +71,8 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 
     private JTextArea changeLog;
 
-    protected CompileAction compileAction;
+    private CompileAction compileAction;
+    private CompileAction uploadAction;
 
     // Simple file management choices
     private final JFileChooser chooser;
@@ -469,11 +474,12 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 				} catch (FileNotFoundException e1) {
 					e1.printStackTrace();
 				}
-				
+				compiledOutput = new ArrayList<byte[]>();
                 for ( Instruction s : compiler.getInstructions() )
                 {
                     changeLog.append(s.toString()+'\n');
                     try {
+                    	compiledOutput.add(s.toFile());
 						os.write(s.toFile());
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -487,6 +493,27 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 
             }
         }
+    }
+    
+    private List<byte[]> compiledOutput;
+    
+    class UploadAction extends AbstractAction {
+    	SerialManager manager;
+        public UploadAction() {
+            super("Upload");
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                    KeyEvent.VK_C, ActionEvent.ALT_MASK));
+            manager = new SerialManager();
+        }
+        
+        public void actionPerformed(ActionEvent e) {
+        	manager.initProgram();
+        	for ( byte[] b : compiledOutput )
+        		manager.write(b);
+        	manager.finishProgram();
+        	manager.runProgram();
+        }
+        
     }
     
     
