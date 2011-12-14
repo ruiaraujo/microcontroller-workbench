@@ -15,10 +15,10 @@ import java.util.TooManyListenersException;
 
 import com.doublecheck.bstworkbench.io.MicrocontrollerManager;
 
-public class SerialManager implements MicrocontrollerManager, SerialPortEventListener{
+public class SerialManager implements MicrocontrollerManager{
 	   private CommPortIdentifier portId;
 	   private Enumeration portList;
-
+	   private Listener listener;
 	    InputStream inputStream;
 	    OutputStream outputStream;
 	    SerialPort serialPort;
@@ -36,30 +36,34 @@ public class SerialManager implements MicrocontrollerManager, SerialPortEventLis
 	                //}
 	            }
 	        }
+	        if ( portId == null )
+	        	return;
 	        try {
 	            serialPort = (SerialPort) portId.open("SimpleReadApp", 2000);
 	        } catch (PortInUseException e) {System.out.println(e);}
 	        try {
 	            inputStream = serialPort.getInputStream();
+
 	            outputStream = serialPort.getOutputStream();
 	        } catch (IOException e) {System.out.println(e);}
 		try {
-	            serialPort.addEventListener(this);
+			listener = new Listener();
 		} catch (TooManyListenersException e) {System.out.println(e);}
 	        serialPort.notifyOnDataAvailable(true);
 	        try {
-	            serialPort.setSerialPortParams(38400,
+	            serialPort.setSerialPortParams(9600,
 	                SerialPort.DATABITS_8,
 	                SerialPort.STOPBITS_1,
 	                SerialPort.PARITY_NONE);
 	        } catch (UnsupportedCommOperationException e) {System.out.println(e);}
-
+	        new Thread(listener).start();
 	    }
 	    
 	    public void initProgram(){
 	    	try {
-		    	outputStream.write('p');
-				outputStream.flush();
+	    		byte p = 0x70;
+		    	outputStream.write(p);
+				outputStream.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -95,29 +99,65 @@ public class SerialManager implements MicrocontrollerManager, SerialPortEventLis
 			}
 	    }
 
+	    private class Listener implements  Runnable ,  SerialPortEventListener {
+	    	
+	    	private Listener() throws TooManyListenersException{
+		        serialPort.addEventListener(this);	
+	    	}
+	    	
+			public void run() {
+				while (true)
+					{
+					try {
+					
+						Thread.sleep(10000000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		    public void serialEvent(SerialPortEvent event) {
+		        switch(event.getEventType()) {
+		        case SerialPortEvent.BI:
+		        case SerialPortEvent.OE:
+		        case SerialPortEvent.FE:
+		        case SerialPortEvent.PE:
+		        case SerialPortEvent.CD:
+		        case SerialPortEvent.CTS:
+		        case SerialPortEvent.DSR:
+		        case SerialPortEvent.RI:
+		        case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
+		            break;
+		        case SerialPortEvent.DATA_AVAILABLE:
+		            byte[] readBuffer = new byte[2048];
 
-	    public void serialEvent(SerialPortEvent event) {
-	        switch(event.getEventType()) {
-	        case SerialPortEvent.BI:
-	        case SerialPortEvent.OE:
-	        case SerialPortEvent.FE:
-	        case SerialPortEvent.PE:
-	        case SerialPortEvent.CD:
-	        case SerialPortEvent.CTS:
-	        case SerialPortEvent.DSR:
-	        case SerialPortEvent.RI:
-	        case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
-	            break;
-	        case SerialPortEvent.DATA_AVAILABLE:
-	            byte[] readBuffer = new byte[20];
+		            try {
+		            	int numBytes = 0;
+		                while (inputStream.available() > 0 ) {
+		                    numBytes += inputStream.read(readBuffer,numBytes,readBuffer.length-numBytes );
+		                    if ( numBytes == readBuffer.length )
+		                    	break;
+		                   // Thread.sleep(100);
+		                }
+		                System.out.println(new String(readBuffer));
+		            } catch (IOException e) {System.out.println(e);} /*catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}*/
+		            break;
+		        }
+		    }
+		}
 
-	            try {
-	                while (inputStream.available() > 0) {
-	                    int numBytes = inputStream.read(readBuffer);
-	                }
-	                System.out.print(new String(readBuffer));
-	            } catch (IOException e) {System.out.println(e);}
-	            break;
-	        }
-	    }
+		public void write(byte b) {
+	    	try {
+		    	outputStream.write(b);
+		    	outputStream.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}
+
+	
 }
