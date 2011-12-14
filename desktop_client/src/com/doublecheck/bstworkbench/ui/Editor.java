@@ -7,15 +7,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -205,14 +202,14 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 		// First try loading resource (running from demo jar), then try
 		// accessing file (debugging in Eclipse).
 		ClassLoader cl = getClass().getClassLoader();
-		InputStream in = cl.getResourceAsStream("bst.xml");
+		InputStream in = cl.getResourceAsStream("svf.xml");
 		try {
 			if (in!=null) {
 				cp.loadFromXML(in);
 				in.close();
 			}
 			else {
-				cp.loadFromXML(new File("bst.xml"));
+				cp.loadFromXML(new File("svf.xml"));
 			}
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -503,7 +500,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
             super("Upload");
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
                     KeyEvent.VK_C, ActionEvent.ALT_MASK));
-            manager = new SerialManager();
+           // manager = new SerialManager();
         }
         
         public void actionPerformed(ActionEvent e) {
