@@ -506,7 +506,8 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         public void actionPerformed(ActionEvent e) {
         	manager.initProgram();
         	for ( byte[] b : compiledOutput )
-        		manager.write(b);
+        			manager.write(b);
+
         	manager.finishProgram();
         	manager.runProgram();
         }
