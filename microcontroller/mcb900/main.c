@@ -21,6 +21,9 @@
 #define FIM 10
 
 #define COD_PROG_INIT 'p'
+#define COD_RUN 'r'
+#define COD_STEP 't'
+#define COD_STOP 's'
 
 //#define DEBUG 1		 
 
@@ -45,16 +48,35 @@ void main()
 	TMOD = 0x11;
 	com_initialize();
 	EA = 1;
-	
 	state = WAITING;
-
+#ifdef DEBUG
+	state = RUN;
+	buffer[0] = 2;
+	buffer[1] = 1;
+	buffer[2] = 0xff;
+	buffer[3] = 3;
+	buffer[4] = 1;
+	buffer[5] = 0x01;
+	buffer[6] = 4;
+	buffer[7] = 1;
+	buffer[8] = 0x00;
+	buffer[9] = 0;
+	buffer[10] = 1;
+	buffer[11] = 7;
+	buffer[12] = 1;
+	buffer[13] = 1;
+	buffer[14] = 1;
+	update_prog_size(15);  
+#endif
 	while(1)
 	{
 		if(state == RUN){
 			run();
+			state = WAITING;
 		}
 		if ( state == STEP ){
 			step();
+			state = WAITING;
 		}
 
 	}
@@ -72,6 +94,7 @@ void serial (void) interrupt 4  {
 	{
 		key = SBUF;
 		RI = 0;
+		P2 = key;
 		if ( key < 10 )
 			putdigit(key);
 		else
@@ -79,9 +102,9 @@ void serial (void) interrupt 4  {
 		if(state == WAITING || state == RUN ){
 			switch(key){
 				case COD_PROG_INIT:  state=INI;ptr = 0; break;
-				case 'r': state=RUN; break;
-				case 's': stop(); break;
-				case 't': state = STEP; break;
+				case COD_RUN: state=RUN; break;
+				case COD_STOP: stop(); break;
+				case COD_STEP: state = STEP; break;
 			}
 		}
 		
@@ -93,6 +116,7 @@ void serial (void) interrupt 4  {
 				{
 					 state=WAITING;
 					 update_prog_size(ptr);
+					 ptr = 0;
 				}
 				
 		}

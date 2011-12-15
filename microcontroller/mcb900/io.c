@@ -69,8 +69,8 @@ static void com_baudrate (void)
 	t_disabled = 1;			    /* disable transmitter */
 	
 	
-	BRGR1 = 0x00; // 38400 bps
-	BRGR0 = 0xB0;
+	BRGR1 = 0x02; // 38400 bps
+	BRGR0 = 0xF0;
 	BRGCON = 0x03; // Select BRG as the clock source for UART
 	
 	EA = 1;                             /* Enable Interrupts */
