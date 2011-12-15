@@ -304,11 +304,11 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         
         final JButton upload = new JButton(uploadAction); 
         final JButton run = new JButton(runTestAction);
-        run.setEnabled(false);
+        //run.setEnabled(false);
         final JButton step = new JButton(stepTestAction);
-        step.setEnabled(false);
+        //step.setEnabled(false);
         final JButton stop = new JButton(stopTestAction);
-        stop.setEnabled(false);
+        //stop.setEnabled(false);
 
         compile.setAction(compileAction);
         layout.setHorizontalGroup(
@@ -637,7 +637,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
                     return ;
                 }
             }
-            manager.stopProgram();
+            manager.stepProgram();
         }
     }
     //File Management Actions and functions

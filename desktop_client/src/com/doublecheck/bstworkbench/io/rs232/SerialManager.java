@@ -125,13 +125,14 @@ public class SerialManager implements MicrocontrollerManager {
     @Override
     public void disconnect() {
         try {
-            outputStream.close();
-            inputStream.close();
             listener.stop = true;
             connected = false;
+            outputStream.close();
+            inputStream.close();
             serialPort.close();
         } catch (final IOException e) {
             e.printStackTrace();
+            disconnect();
         }
     }
 
@@ -144,6 +145,7 @@ public class SerialManager implements MicrocontrollerManager {
             outputStream.flush();
         } catch (final IOException e) {
             e.printStackTrace();
+            disconnect();
         }
     }
 
@@ -156,6 +158,7 @@ public class SerialManager implements MicrocontrollerManager {
             outputStream.close();
         } catch (final IOException e) {
             e.printStackTrace();
+            disconnect();
         }
     }
 
@@ -168,6 +171,7 @@ public class SerialManager implements MicrocontrollerManager {
             outputStream.flush();
         } catch (final IOException e) {
             e.printStackTrace();
+            disconnect();
         }
     }
 
@@ -179,6 +183,7 @@ public class SerialManager implements MicrocontrollerManager {
             outputStream.flush();
         } catch (final IOException e) {
             e.printStackTrace();
+            disconnect();
         }
     }
 
@@ -191,6 +196,7 @@ public class SerialManager implements MicrocontrollerManager {
             outputStream.flush();
         } catch (final IOException e) {
             e.printStackTrace();
+            disconnect();
         }
     }
 
@@ -208,6 +214,7 @@ public class SerialManager implements MicrocontrollerManager {
             outputStream.flush();
         } catch (final IOException e) {
             e.printStackTrace();
+            disconnect();
         }
         
     }
@@ -221,6 +228,7 @@ public class SerialManager implements MicrocontrollerManager {
             outputStream.flush();
         } catch (final IOException e) {
             e.printStackTrace();
+            disconnect();
         }
     }
 
