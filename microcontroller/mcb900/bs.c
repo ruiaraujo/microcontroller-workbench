@@ -16,6 +16,8 @@
 
 #define APPLY_MASK(X) ((X) & (*mask.argument))
 
+#define ERROR_ACK 'e'
+
 unsigned char xdata buffer [BUFFER_SIZE];
 
 static struct {
@@ -121,7 +123,10 @@ void tms(unsigned char value){
 					 tdo_read =( tdo_read << 1 );
 					 tdo_read = tdo_read|(tap_number==1?TDO1:TDO2);
 				}
-                TDI1 = (*tdi.argument) & 0x01;
+                if ( tap_number == 1 )
+					TDI1 = (*tdi.argument) & 0x01;
+				else
+					TDI2 = (*tdi.argument) & 0x01;
                 *tdi.argument = (*tdi.argument) >> 1;
                 ++tdi.shifts_done;
                 if ( tdi.shifts_done >= 8  )
@@ -132,6 +137,7 @@ void tms(unsigned char value){
 						{
 					   		if ( APPLY_MASK(*tdo.argument) != APPLY_MASK(tdo_read) )
 							{
+								putchar_w(ERROR_ACK);
 								putchar_w(tdi.number_bytes);
 								putchar_w(*tdo.argument);
 								putchar_w(tdo_read);
@@ -148,11 +154,11 @@ void tms(unsigned char value){
 				tap1_clock(  value  );
 				if ( value == 1 )
 				{
-				//TODO:CHECK TDO
 					if ( state == STATE_TDO )
 					{
 						if ( APPLY_MASK(*tdo.argument) != APPLY_MASK(tdo_read) )
 						{
+							putchar_w(ERROR_ACK);
 							putchar_w(tdi.number_bytes);
 							putchar_w(*tdo.argument);
 							putchar_w(tdo_read);
