@@ -41,7 +41,7 @@ public class Instruction {
     private static byte[] getBytes(Long val, final int numberBytes)
     {
     	byte [] line = new byte[numberBytes];
-    	for ( int i = numberBytes -1 , j = 0; i >= 0 ; ++j , --i )
+    	for ( int i = numberBytes -1 , j = numberBytes -1; i >= 0 ; --j , --i )
     	{
     		line[j] = (byte)(val >>> ( 8 * i));
     	}
