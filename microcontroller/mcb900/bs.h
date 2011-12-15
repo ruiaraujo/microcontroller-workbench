@@ -15,7 +15,6 @@ sbit TD02 = P1^1;
 sbit TCK2 = P1^2;
 sbit TDI2 = P1^0;
 sbit TMS2 = P1^3;
-//sbit ICA     = P2^7;
 
 #define BUFFER_SIZE 512
 
@@ -26,12 +25,13 @@ extern unsigned char tap_number;
 
 
 void update_prog_size(unsigned int size);
+void tms(unsigned char);
 void run();
-void run_tms0();
-void run_tms1();
-void run_tdi();
-void run_tdo();
-void run_mask();
+void step();
+void stop();
+void get_tdi();
+void get_tdo();
+void get_mask();
 void run_seltap();
 
 

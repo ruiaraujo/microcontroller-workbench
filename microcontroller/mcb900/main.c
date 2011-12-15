@@ -15,6 +15,7 @@
 #define PARSING_NARGS 5
 #define PARSING_ARG 6
 #define RUN 7
+#define STEP 8
 
 #define PARSING_TAMARG 9
 #define FIM 10
@@ -51,7 +52,11 @@ void main()
 	{
 		if(state == RUN){
 			run();
-		};
+		}
+		if ( state == STEP ){
+			step();
+		}
+
 	}
 }
 void serial (void) interrupt 4  {
@@ -71,10 +76,12 @@ void serial (void) interrupt 4  {
 			putdigit(key);
 		else
 			putchar(key); //if the buffer is full, we don't care
-		if(state == WAITING){
+		if(state == WAITING || state == RUN ){
 			switch(key){
-				case COD_PROG_INIT: putstring("ola"); state=INI;ptr = 0; break;
+				case COD_PROG_INIT:  state=INI;ptr = 0; break;
 				case 'r': state=RUN; break;
+				case 's': stop(); break;
+				case 't': state = STEP; break;
 			}
 		}
 		
