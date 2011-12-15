@@ -13,6 +13,7 @@ void send_more(void);
 // !0 if the buffer is full
 #undef putchar
 char putchar(char c);
+#define putchar_w(c) {while ( putchar(c) ) wait(); }
 
 char putdigit(unsigned char c);
 
