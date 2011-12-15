@@ -22,6 +22,7 @@ import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -52,10 +53,12 @@ import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 
+import com.doublecheck.bstworkbench.Resources;
 import com.doublecheck.bstworkbench.compiler.Compiler;
 import com.doublecheck.bstworkbench.compiler.Instruction;
 import com.doublecheck.bstworkbench.compiler.commands.Command;
 import com.doublecheck.bstworkbench.io.IOUtil;
+import com.doublecheck.bstworkbench.io.MicrocontrollerManager;
 import com.doublecheck.bstworkbench.io.rs232.SerialManager;
 
 @SuppressWarnings("serial")
@@ -68,8 +71,18 @@ public class Editor extends JFrame  implements  SyntaxConstants{
 
     private JTextArea changeLog;
 
-    private CompileAction compileAction;
-    private UploadAction uploadAction;
+    private Resources resources = Resources.getInstance();
+    
+    //SVF hanlding
+    private final CompileAction compileAction;
+    private final UploadAction uploadAction;
+
+    private final RunTestAction runTestAction;
+    private final StopTestAction stopTestAction;
+    private final StepTestAction stepTestAction;
+    private final SerialManager manager;
+    private String portName;
+
 
     // Simple file management choices
     private final JFileChooser chooser;
@@ -83,13 +96,18 @@ public class Editor extends JFrame  implements  SyntaxConstants{
     public Editor() {
         super(TITLE+ " - New File");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        
+        manager = new SerialManager();
         compileAction = new CompileAction();
         openFileAction = new OpenFileAction();
+        runTestAction = new RunTestAction();
+        stopTestAction = new StopTestAction();
+        stepTestAction = new StepTestAction();
         saveFileAction = new SaveFileAction(false);
         saveFileAsAction = new SaveFileAction(true);
         newFileAction = new NewFileAction();
         uploadAction = new UploadAction();
-        
+        portName = resources.getPort(MicrocontrollerManager.SERIAL_PREF_KEY);
         textArea = createTextArea();
         textArea.setSyntaxEditingStyle(SYNTAX_STYLE_SVF);
         scrollPane = new RTextScrollPane(textArea, true);
@@ -97,7 +115,6 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         gutter.setBookmarkingEnabled(true);
         URL url = getClass().getClassLoader().getResource("bookmark.png");
         gutter.setBookmarkIcon(new ImageIcon(url));
-
         
         // Install auto-completion onto our text area.
         AutoCompletion ac = new AutoCompletion(createCompletionProvider());
@@ -286,11 +303,11 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         final JButton compile = new JButton(compileAction);
         
         final JButton upload = new JButton(uploadAction); 
-        final JButton run = new JButton("Run");
+        final JButton run = new JButton(runTestAction);
         run.setEnabled(false);
-        final JButton step = new JButton("Step ");
+        final JButton step = new JButton(stepTestAction);
         step.setEnabled(false);
-        final JButton stop = new JButton("Stop");
+        final JButton stop = new JButton(stopTestAction);
         stop.setEnabled(false);
 
         compile.setAction(compileAction);
@@ -391,8 +408,14 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         final JMenu menu = new JMenu("Action");
         menu.setMnemonic('A'); // set mnemonic to F
         menu.add(compileAction);
-        menu.addSeparator();
+        menu.add(uploadAction);
 
+        menu.addSeparator();
+        
+        menu.add(runTestAction);
+        menu.add(stepTestAction);
+        menu.add(stopTestAction);
+        
         return menu;
     }
 
@@ -416,6 +439,18 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         menu.addSeparator();
 
         menu.add(RTextArea.getAction(RTextArea.SELECT_ALL_ACTION));
+        menu.addSeparator();
+        JMenuItem preferences = new JMenuItem("Preferences");
+        preferences.addActionListener(new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               JDialog preferencesDialog =  new CommChooserDialog(Editor.this);
+               preferencesDialog.setVisible(true);
+               portName = resources.getPort(MicrocontrollerManager.SERIAL_PREF_KEY);
+            }
+        });
+        menu.add(preferences);
         return menu;
     }
     
@@ -495,26 +530,116 @@ public class Editor extends JFrame  implements  SyntaxConstants{
     private List<byte[]> compiledOutput;
     
     class UploadAction extends AbstractAction {
-    	SerialManager manager;
         public UploadAction() {
             super("Upload");
             putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
-                    KeyEvent.VK_C, ActionEvent.ALT_MASK));
-           // manager = new SerialManager();
+                    KeyEvent.VK_U, ActionEvent.ALT_MASK));
         }
         
         public void actionPerformed(ActionEvent e) {
+            if ( portName == null ){
+                changeLog.append("Use the preferences to set up the serial port.");
+                return;
+            }
+            if ( !manager.isConnected() )
+            {
+                if ( !manager.connect(portName) )
+                {
+                    changeLog.append("Error using the serial port.\n");
+                    changeLog.append("Make sure that no other port is trying to use the serial port.\n");
+                    return ;
+                }
+            }
+            if ( compiledOutput.size() == 0 )
+            {
+                changeLog.append("Please compile first.\n");
+                return;
+            }
         	manager.initProgram();
         	for ( byte[] b : compiledOutput )
         			manager.write(b);
-
         	manager.finishProgram();
-        	manager.runProgram();
         }
         
     }
     
+    class RunTestAction extends AbstractAction {
+        public RunTestAction() {
+            super("Run");
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                    KeyEvent.VK_R, ActionEvent.ALT_MASK));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if ( portName == null ){
+                changeLog.append("Use the preferences to set up the serial port.");
+                return;
+            }
+            if ( !manager.isConnected() )
+            {
+                if ( !manager.connect(portName) )
+                {
+                    changeLog.append("Error using the serial port.\n");
+                    changeLog.append("Make sure that no other port is trying to use the serial port.\n");
+                    return ;
+                }
+            }
+            manager.runProgram();
+        }
+    }
     
+    class StopTestAction extends AbstractAction {
+        public StopTestAction() {
+            super("Stop");
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                    KeyEvent.VK_S, ActionEvent.ALT_MASK));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if ( portName == null ){
+                changeLog.append("Use the preferences to set up the serial port.");
+                return;
+            }
+            if ( !manager.isConnected() )
+            {
+                if ( !manager.connect(portName) )
+                {
+                    changeLog.append("Error using the serial port.\n");
+                    changeLog.append("Make sure that no other port is trying to use the serial port.\n");
+                    return ;
+                }
+            }
+            manager.stopProgram();
+        }
+    }
+    
+    class StepTestAction extends AbstractAction {
+        public StepTestAction() {
+            super("Step");
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                    KeyEvent.VK_T, ActionEvent.ALT_MASK));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if ( portName == null ){
+                changeLog.append("Use the preferences to set up the serial port.");
+                return;
+            }
+            if ( !manager.isConnected() )
+            {
+                if ( !manager.connect(portName) )
+                {
+                    changeLog.append("Error using the serial port.\n");
+                    changeLog.append("Make sure that no other port is trying to use the serial port.\n");
+                    return ;
+                }
+            }
+            manager.stopProgram();
+        }
+    }
     //File Management Actions and functions
     
     protected void changesNotSaved(){
