@@ -10,13 +10,21 @@ import gnu.io.UnsupportedCommOperationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.TooManyListenersException;
 
+import com.doublecheck.bstworkbench.StringUtils;
 import com.doublecheck.bstworkbench.io.MicrocontrollerManager;
 
 public class SerialManager implements MicrocontrollerManager {
 
+	private State state;
+	private enum State {
+		RUNNING, PAUSED;
+	};
+	
     private class SerialInputListener implements Runnable,
             SerialPortEventListener {
         private boolean stop = false;
@@ -59,11 +67,31 @@ public class SerialManager implements MicrocontrollerManager {
                         if (numBytes == readBuffer.length) {
                             break;
                         }
+                        Thread.sleep(100);
                     }
-                    System.out.println(new String(readBuffer));
+                    String input = new String(readBuffer);
+                    if ( state == State.RUNNING )
+                    {
+                    	int pos = 0;
+                    	boolean error = false;
+                    	while ( ( pos = input.indexOf('e') ) != -1){
+                    		error = true;
+                    		System.out.print(input.substring(0,pos+1));
+                    		for ( int i = pos +1  ;  i < pos +4 ; ++i )
+                    			System.out.print(StringUtils.getHexString(readBuffer[i]) + ' ');
+                    		input = input.substring(pos+4);
+                    		System.out.println(input);
+                    	}
+                    	if ( ! error )
+                    		System.out.println(input);
+                    }
+                    else
+                    	System.out.println(input);
                 } catch (final IOException e) {
                     e.printStackTrace();
-                }
+                } catch (InterruptedException e) {
+					e.printStackTrace();
+				}
                 break;
             }
         }
@@ -78,6 +106,7 @@ public class SerialManager implements MicrocontrollerManager {
 
     public SerialManager() {
         connected = false;
+        state = State.PAUSED;
     }
 
     @SuppressWarnings("unchecked")
@@ -167,6 +196,7 @@ public class SerialManager implements MicrocontrollerManager {
         if (!connected)
             return;
         try {
+        	state = State.RUNNING;
             outputStream.write('r');
             outputStream.flush();
         } catch (final IOException e) {
@@ -232,4 +262,16 @@ public class SerialManager implements MicrocontrollerManager {
         }
     }
 
+    List<AcknowledgementListener> listeners = new ArrayList<AcknowledgementListener>();
+    
+	public void addAcknowledgementListener(AcknowledgementListener listener) {
+		if ( !listeners.contains(listener) )
+		{
+			listeners.add(listener);
+		}
+	}
+
+	public void removeAcknowledgementListener(AcknowledgementListener listener) {
+		listeners.remove(listener);
+	}
 }

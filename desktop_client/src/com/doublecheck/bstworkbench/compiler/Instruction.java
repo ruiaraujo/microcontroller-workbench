@@ -4,10 +4,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class Instruction {
+
     private final byte identifier;
     private final byte numberBytes;
     private final Long argument;
-    public Instruction(byte identifier, byte numberBytes, Long argument) {
+    public Instruction( byte identifier, byte numberBytes, Long argument) {
         super();
         this.identifier = identifier;
         this.numberBytes = numberBytes;
@@ -40,6 +41,9 @@ public class Instruction {
     
     private static byte[] getBytes(Long val, final int numberBytes)
     {
+    	/**
+    	 * The bytes are placed in little endian order.
+    	 */
     	byte [] line = new byte[numberBytes];
     	for ( int i = numberBytes -1 , j = numberBytes -1; i >= 0 ; --j , --i )
     	{

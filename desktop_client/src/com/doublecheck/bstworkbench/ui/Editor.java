@@ -62,7 +62,8 @@ import com.doublecheck.bstworkbench.io.MicrocontrollerManager;
 import com.doublecheck.bstworkbench.io.rs232.SerialManager;
 
 @SuppressWarnings("serial")
-public class Editor extends JFrame  implements  SyntaxConstants{
+public class Editor extends JFrame  implements  SyntaxConstants , 
+												MicrocontrollerManager.AcknowledgementListener{
 
     private final static String TITLE = "Microcontroller Workbench";
 
@@ -80,7 +81,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
     private final RunTestAction runTestAction;
     private final StopTestAction stopTestAction;
     private final StepTestAction stepTestAction;
-    private final SerialManager manager;
+    private final MicrocontrollerManager manager;
     private String portName;
 
 
@@ -98,6 +99,7 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         
         manager = new SerialManager();
+        manager.addAcknowledgementListener(this);
         compileAction = new CompileAction();
         openFileAction = new OpenFileAction();
         runTestAction = new RunTestAction();
@@ -766,5 +768,16 @@ public class Editor extends JFrame  implements  SyntaxConstants{
         }
 
     }
+
+	public void onAckReceived() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void onErrorAckReceived() {
+		// TODO Auto-generated method stub
+		
+	}
    
 }

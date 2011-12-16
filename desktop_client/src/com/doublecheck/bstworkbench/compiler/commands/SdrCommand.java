@@ -171,7 +171,7 @@ public class SdrCommand extends Command {
         }
         ret.add(new Instruction(Command.TMS0, (byte)1, (long)numberBits-1));
         ret.addAll(stateMachine.moveToState("update-dr"));
-        ret.addAll(stateMachine.moveToState("idle"));
+        //ret.addAll(stateMachine.moveToState("idle"));
         return ret;
     }
 
