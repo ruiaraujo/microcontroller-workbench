@@ -13,7 +13,7 @@ void send_more(void);
 // !0 if the buffer is full
 #undef putchar
 char putchar(char c);
-#define putchar_w(c) {while ( putchar(c) ) wait(); }
+#define putchar_w(c) {while ( putchar(c) != 0 ) wait(); }
 
 char putdigit(unsigned char c);
 
@@ -23,6 +23,7 @@ char putdigit(unsigned char c);
 void putstring(char * s);
 
 char puthexdigit(unsigned char val);
+#define puthexdigit_w(c) {while ( puthexdigit(c) != 0 ) wait(); }
 
 void wait_a_lot(void);
 void wait(void);

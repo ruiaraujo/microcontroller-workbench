@@ -12,6 +12,7 @@
 #define COD_TDO 3
 #define COD_MASK 4
 #define COD_SELTAP 5
+#define COD_RUNTEST 6
 
 
 #define APPLY_MASK(X) ((X) & (*mask.argument))
@@ -33,7 +34,7 @@ unsigned int iter = 0;
 unsigned int size;
 
 
-unsigned char state = NORMAL;
+static unsigned char state  = NORMAL;
 
 
 
@@ -46,10 +47,12 @@ void stop(){//this is one way of stopping the run loop below.
    iter = size +1;
 }
 
-void step(){
+void step(){   
+	if ( iter >= size )
+		return;
 	putdigit(buffer[iter]);
 	putchar('\n');
-        switch(buffer[iter]){
+    switch(buffer[iter]){
  		case COD_TMS0: tms(0); break; 
 		case COD_TMS1: tms(1);break;
 		case COD_TDI: get_tdi();break;
@@ -62,17 +65,13 @@ void step(){
 void run(){
 	iter = 0;
     state = NORMAL;
-	while(iter < size ){
-	 	switch(buffer[iter]){
-     		case COD_TMS0: tms(0); break; 
-		    case COD_TMS1: tms(1);break;
-		    case COD_TDI: get_tdi();break;
-		    case COD_TDO: get_tdo(); break;
-		    case COD_MASK: get_mask(); break;
-		    case COD_SELTAP: run_seltap(); break;
-			default: ++iter; break;
-	 	}
-	}	
+	while(iter < size ){ 
+		step();
+	}
+	putstring("itr: ");
+	puthexdigit_w('0' + iter/100);
+	puthexdigit_w('0' + iter/10 );
+	puthexdigit_w('0' + iter%10);
 	iter = 0;
     state = NORMAL;		
 }
@@ -94,6 +93,7 @@ static void tap1_clock(unsigned char value ){
 }
 
 unsigned char number_bytes;
+unsigned char argument_byte;
 unsigned long int argument;
 
 void tms(unsigned char value){
@@ -114,6 +114,9 @@ void tms(unsigned char value){
 	{
 	        if ( state ==  NORMAL )
 	        {
+			
+	            putstring("TMS ");
+				putchar_w('0'+value);
 	            tap1_clock(  value  );
 	        }
 	        else if ( state == STATE_TDI || state == STATE_TDO )
@@ -124,10 +127,10 @@ void tms(unsigned char value){
 					 tdo_read = tdo_read|(tap_number==1?TDO1:TDO2);
 				}
                 if ( tap_number == 1 )
-					TDI1 = (*tdi.argument) & 0x01;
+					TDI1 = argument_byte & 0x01;
 				else
-					TDI2 = (*tdi.argument) & 0x01;
-                *tdi.argument = (*tdi.argument) >> 1;
+					TDI2 = argument_byte & 0x01;
+                argument_byte = argument_byte >> 1;
                 ++tdi.shifts_done;
                 if ( tdi.shifts_done >= 8  )
                 {
@@ -148,9 +151,11 @@ void tms(unsigned char value){
                         tdi.shifts_done = 0;
                         --tdi.number_bytes;
 						tdi.argument++;
+						argument_byte = *tdi.argument;
                    }
                 }
-	            
+	            putstring("TMS ");
+				putchar_w('0'+value);
 				tap1_clock(  value  );
 				if ( value == 1 )
 				{
@@ -179,6 +184,7 @@ void get_tdi(){
 	tdi.number_bytes = buffer[++iter];
 	++iter;
 	tdi.argument  = &buffer[iter];
+	argument_byte = *tdi.argument;
 	tdi.shifts_done = 0;
 	iter += tdi.number_bytes;
 	state = STATE_TDI;
@@ -206,8 +212,17 @@ void get_mask(){
 
 void run_seltap(){
 	++iter; //go over the identifier
-	++iter; //Going over the number of bytes
     tap_number = buffer[++iter];
+	++iter;
 	putchar_w(ACK);
 //	putdigit(tap_number);
+}
+
+void debug_parser(){
+ 	iter = 0;
+	while(iter < size ){
+		puthexdigit_w( buffer[iter] );
+		++iter;
+	}	
+	iter = 0;
 }
