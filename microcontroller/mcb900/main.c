@@ -30,7 +30,7 @@
 //#define DEBUG 1		 
 
 
-int ptr=0;
+unsigned int ptr=0;
 unsigned char tam_arg =0;
 static unsigned char state_parser;
 static unsigned char response;
@@ -43,7 +43,7 @@ void main()
 	P1M2 = 0x0;
  	P3M1 = 0;	
 	P3M2 = 0x0;
-	P2M1 = 0;
+	P2M1 = 0x12;
 	P2M2 = 0x0;
 	P2 = 0; // clean Outputs
 	TMOD = 0x11;
@@ -111,6 +111,7 @@ void main()
 	{
 		if(state_parser == RUN){
 			run();
+			//while(1)step();
 			state_parser = WAITING;
 		}
 		if ( state_parser == STEP ){
@@ -146,7 +147,8 @@ void serial (void) interrupt 4  {
 			switch(key){
 				case COD_PROG_INIT:  state_parser=INI;ptr = 0; break;
 				case COD_RUN: state_parser=RUN; break;
-				case COD_STOP: state_parser = DEBUG_PARSER; break;
+				case COD_STOP:	stop(); break;
+				case 'l': state_parser = DEBUG_PARSER; break;
 				case COD_STEP: state_parser = STEP; break;
 			}
 		}

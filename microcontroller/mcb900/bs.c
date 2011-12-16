@@ -46,12 +46,18 @@ void update_prog_size(unsigned int prog_size ){
 void stop(){//this is one way of stopping the run loop below.
    iter = size +1;
 }
-
+  
 void step(){   
 	if ( iter >= size )
+	{
+	
+	putstring("itr: ");
+	puthexdigit_w(iter/100);
+	puthexdigit_w((iter%100)/10 );
+	puthexdigit_w(iter%10);
 		return;
+	}
 	putdigit(buffer[iter]);
-	putchar('\n');
     switch(buffer[iter]){
  		case COD_TMS0: tms(0); break; 
 		case COD_TMS1: tms(1);break;
@@ -66,12 +72,104 @@ void run(){
 	iter = 0;
     state = NORMAL;
 	while(iter < size ){ 
+		wait();
 		step();
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+					 ;
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		
+		wait();
+		wait();
+		wait();
+		wait();
+
 	}
 	putstring("itr: ");
-	puthexdigit_w('0' + iter/100);
-	puthexdigit_w('0' + iter/10 );
-	puthexdigit_w('0' + iter%10);
+	puthexdigit_w(iter/100);
+	puthexdigit_w((iter%100)/10 );
+	puthexdigit_w(iter%10);
 	iter = 0;
     state = NORMAL;		
 }
@@ -82,6 +180,7 @@ static void tap1_clock(unsigned char value ){
         {
                 TMS1 = value;
                 TCK1 = 1;
+		//		wait();
                 TCK1 = 0;
         }
         else
@@ -98,6 +197,9 @@ unsigned long int argument;
 
 void tms(unsigned char value){
         unsigned char i;
+		
+  //  putstring("TMS R ");
+//	putchar_w('0'+value);
 	number_bytes = buffer[++iter];
 //	putdigit(number_bytes/100);
 //	putdigit(number_bytes/10);
@@ -145,6 +247,7 @@ void tms(unsigned char value){
 								putchar_w(*tdo.argument);
 								putchar_w(tdo_read);
 							}
+							tdo_read = 0;
 							tdo.argument++;
 							mask.argument++;
 						}
@@ -168,6 +271,7 @@ void tms(unsigned char value){
 							putchar_w(*tdo.argument);
 							putchar_w(tdo_read);
 						}
+						tdo_read = 0;
 					}
 					state = NORMAL; // if TMS = 1 we are not shifting anymore.
 				}
