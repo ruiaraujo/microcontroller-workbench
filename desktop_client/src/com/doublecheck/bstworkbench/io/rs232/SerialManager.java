@@ -72,18 +72,17 @@ public class SerialManager implements MicrocontrollerManager {
                     String input = new String(readBuffer);
                     if ( state == State.RUNNING )
                     {
-                    	int pos = 0;
+                    	int pos = 0, readBufferPos  = 0;
                     	boolean error = false;
                     	while ( ( pos = input.indexOf('e') ) != -1){
                     		error = true;
                     		System.out.print(input.substring(0,pos+1));
-                    		for ( int i = pos +1  ;  i < pos +4 ; ++i )
+                    		for ( int i = pos +1 + readBufferPos  ;  i < pos +4 +readBufferPos; ++i )
                     			System.out.print(StringUtils.getHexString(readBuffer[i]) + ' ');
                     		input = input.substring(pos+4);
-                    		System.out.println(input);
+                    		readBufferPos += pos+4;
                     	}
-                    	if ( ! error )
-                    		System.out.println(input);
+                    	System.out.println(input);
                     }
                     else
                     	System.out.println(input);
@@ -254,6 +253,7 @@ public class SerialManager implements MicrocontrollerManager {
         if (!connected)
             return;
         try {
+        	state = State.RUNNING;
             outputStream.write('t');
             outputStream.flush();
         } catch (final IOException e) {
