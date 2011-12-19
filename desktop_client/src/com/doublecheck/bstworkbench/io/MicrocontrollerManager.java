@@ -28,6 +28,10 @@ public interface MicrocontrollerManager {
     public interface AcknowledgementListener{
     	public void onAckReceived();
     	
+    	public void onTDOReceived( String received );
+    	
+    	public void onTDISent( String received );
+    	
     	public void onErrorAckReceived();
     }
 }

@@ -781,5 +781,17 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
 		// TODO Auto-generated method stub
 		
 	}
+
+
+	public void onTDISent(String received) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void onTDOReceived(String received) {
+		// TODO Auto-generated method stub
+		
+	}
    
 }

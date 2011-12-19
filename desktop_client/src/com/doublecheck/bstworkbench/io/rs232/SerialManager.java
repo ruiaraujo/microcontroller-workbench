@@ -22,7 +22,7 @@ public class SerialManager implements MicrocontrollerManager {
 
 	private State state;
 	private enum State {
-		RUNNING, PAUSED;
+		RUNNING, PAUSED, TDO, TDI, TDO_TDI;
 	};
 	
     private class SerialInputListener implements Runnable,
@@ -88,7 +88,7 @@ public class SerialManager implements MicrocontrollerManager {
                     	System.out.println(input);
                 } catch (final IOException e) {
                     e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
 					e.printStackTrace();
 				}
                 break;
@@ -158,6 +158,7 @@ public class SerialManager implements MicrocontrollerManager {
             outputStream.close();
             inputStream.close();
             serialPort.close();
+            state = State.PAUSED;
         } catch (final IOException e) {
             e.printStackTrace();
             disconnect();
@@ -238,6 +239,7 @@ public class SerialManager implements MicrocontrollerManager {
     public void stopProgram() {
         if (!connected)
             return;
+        state = State.PAUSED;
         try {
             outputStream.write('s');
             outputStream.flush();

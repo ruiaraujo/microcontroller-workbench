@@ -194,6 +194,11 @@ public class TapStateMachine {
     public static Instruction getResetInstructions() {
         return new Instruction(Command.TMS1, (byte)1, 5L);
     }
+    
+    public void reset(){
+    	currentNode = possibleStates.get("reset");
+    	cleanNodeState();
+    }
 
     private static void cleanNodeState() {
         for (String name : possibleStates.keySet())

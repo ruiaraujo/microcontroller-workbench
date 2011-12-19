@@ -36,7 +36,7 @@ public class SirCommand extends SdrCommand {
     public List<Instruction> getInstructions() {
         TapStateMachine stateMachine = TapStateMachine.getInstance();
         List<Instruction> ret = new ArrayList<Instruction>();
-        ret.addAll(stateMachine.moveToState("shift-ir"));
+        ret.addAll(stateMachine.moveToState("capture-ir"));
         ret.addAll(stateMachine.moveToState("shift-ir"));
         byte numberBytes = (byte) (numberBits/8);
         if ( numberBytes*8 < numberBits )
@@ -49,7 +49,6 @@ public class SirCommand extends SdrCommand {
         }
         ret.add(new Instruction(Command.TMS0, (byte)1, (long)numberBits-1));
         ret.addAll(stateMachine.moveToState("update-ir"));
-        ret.addAll(stateMachine.moveToState("idle"));
         return ret;
     }
 
