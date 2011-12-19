@@ -508,13 +508,15 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
 				} catch (FileNotFoundException e1) {
 					e1.printStackTrace();
 				}
-				compiledOutput = new ArrayList<byte[]>();
-                for ( Instruction s : compiler.getInstructions() )
+				compiledOutput = compiler.getResult().getOutputFile();
+                for ( Instruction s : compiler.getResult().getInstructions() )
                 {
                     changeLog.append(s.toString()+'\n');
-                    try {
-                    	compiledOutput.add(s.toFile());
-						os.write(s.toFile());
+                }
+                for ( byte[] b : compiledOutput )
+                {
+                	try {
+						os.write(b);
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}

@@ -13,16 +13,17 @@ import com.doublecheck.bstworkbench.compiler.commands.TapStateMachine;
 public class Compiler {
     private final List<Error> errors;
     private final List<Command> commands;
-    private final List<Instruction> instructions;
+    private final CompilationResult result;
     
     public Compiler(){
         errors = new ArrayList<Error>();
         commands = new ArrayList<Command>();
-        instructions = new ArrayList<Instruction>();
+        result = new CompilationResult();
     }
     
     public void parse(RSyntaxDocument rSyntaxDocument){
         int size = rSyntaxDocument.getLineCount();
+        result.addInitialInstructions(TapStateMachine.getResetInstructions()); 
         for ( int i = 0 ; i < size ; ++i  )
         {
             Token tok = rSyntaxDocument.getTokenListForLine(i);
@@ -48,7 +49,7 @@ public class Compiler {
                         if ( com != null )
                         {  
                             com.checkConsistency();
-                            instructions.addAll(com.getInstructions());
+                            result.addInstructions(i+1,com.getInstructions());
                             commands.add(com);
                         }
                         else
@@ -63,8 +64,6 @@ public class Compiler {
                     break;
             }
         }
-        if ( !detectedErrors() )
-            instructions.add(0,TapStateMachine.getResetInstructions()); 
     }
  
     
@@ -96,7 +95,7 @@ public class Compiler {
         return commands;
     }
 
-    public List<Instruction> getInstructions() {
-        return instructions;
+    public CompilationResult getResult() {
+        return result;
     }
 }
