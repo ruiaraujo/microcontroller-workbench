@@ -43,8 +43,8 @@ void main()
 	P1M2 = 0x0;
  	P3M1 = 0;	
 	P3M2 = 0x0;
-	P2M1 = 0x12;
-	P2M2 = 0x0;
+	P2M1 = 0x05;
+	P2M2 = 0xFA;
 	P2 = 0; // clean Outputs
 	TMOD = 0x11;
 	com_initialize();
