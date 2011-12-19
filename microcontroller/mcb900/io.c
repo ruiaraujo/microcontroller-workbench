@@ -23,8 +23,7 @@ void wait(void){
 char puthexdigit(unsigned char val){
 	if ( val < 10 )
 		return putchar('0'+val);
-	else
-		return putchar('7'+val);//'A'-10 == '7'
+	return putchar('7'+val);//'A'-10 == '7'
 }
 
 //just a wrapper over putchcar 

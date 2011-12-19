@@ -12,11 +12,14 @@
 #define COD_TDO 3
 #define COD_MASK 4
 #define COD_SELTAP 5
+#define COD_RUNTEST 6
 
 
 #define APPLY_MASK(X) ((X) & (*mask.argument))
 
 #define ERROR_ACK 'e'
+#define TDO 'f'
+#define TDI 't'
 
 unsigned char xdata buffer [BUFFER_SIZE];
 
@@ -33,7 +36,7 @@ unsigned int iter = 0;
 unsigned int size;
 
 
-unsigned char state = NORMAL;
+static unsigned char state  = NORMAL;
 
 
 
@@ -45,11 +48,21 @@ void update_prog_size(unsigned int prog_size ){
 void stop(){//this is one way of stopping the run loop below.
    iter = size +1;
 }
-
-void step(){
+  
+void step(){   
+	if ( iter >= size )
+	{
+	
+		putstring("itr: ");
+		puthexdigit_w(iter/100);
+		puthexdigit_w((iter%100)/10 );
+		puthexdigit_w(iter%10);
+		return;
+	}
+	#ifdef DEBUG
 	putdigit(buffer[iter]);
-	putchar('\n');
-        switch(buffer[iter]){
+    #endif
+	switch(buffer[iter]){
  		case COD_TMS0: tms(0); break; 
 		case COD_TMS1: tms(1);break;
 		case COD_TDI: get_tdi();break;
@@ -62,17 +75,105 @@ void step(){
 void run(){
 	iter = 0;
     state = NORMAL;
-	while(iter < size ){
-	 	switch(buffer[iter]){
-     		case COD_TMS0: tms(0); break; 
-		    case COD_TMS1: tms(1);break;
-		    case COD_TDI: get_tdi();break;
-		    case COD_TDO: get_tdo(); break;
-		    case COD_MASK: get_mask(); break;
-		    case COD_SELTAP: run_seltap(); break;
-			default: ++iter; break;
-	 	}
-	}	
+	while(iter < size ){ 
+		wait();
+		step();
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+					 ;
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		wait();
+		wait();
+		wait();
+		wait();
+		
+		
+		wait();
+		wait();
+		wait();
+		wait();
+
+	}
+	putstring("itr: ");
+	puthexdigit_w(iter/100);
+	puthexdigit_w((iter%100)/10 );
+	puthexdigit_w(iter%10);
 	iter = 0;
     state = NORMAL;		
 }
@@ -83,6 +184,7 @@ static void tap1_clock(unsigned char value ){
         {
                 TMS1 = value;
                 TCK1 = 1;
+		//		wait();
                 TCK1 = 0;
         }
         else
@@ -94,10 +196,17 @@ static void tap1_clock(unsigned char value ){
 }
 
 unsigned char number_bytes;
+unsigned char argument_byte;
 unsigned long int argument;
+
+
+unsigned char i_hate_tdo = 0 ;
 
 void tms(unsigned char value){
         unsigned char i;
+		
+  //  putstring("TMS R ");
+//	putchar_w('0'+value);
 	number_bytes = buffer[++iter];
 //	putdigit(number_bytes/100);
 //	putdigit(number_bytes/10);
@@ -114,20 +223,25 @@ void tms(unsigned char value){
 	{
 	        if ( state ==  NORMAL )
 	        {
+			 #ifdef DEBUG
+	            putstring("TMS ");
+				putchar_w('0'+value);
+			#endif
 	            tap1_clock(  value  );
 	        }
 	        else if ( state == STATE_TDI || state == STATE_TDO )
 	        {
 				if ( state == STATE_TDO )
 				{
-					 tdo_read =( tdo_read << 1 );
-					 tdo_read = tdo_read|(tap_number==1?TDO1:TDO2);
+					 //tdo_read = tdo_read << 1 ;
+					 i_hate_tdo = (tap_number==1?TDO1:TDO2);
+					 tdo_read = tdo_read|(i_hate_tdo<<tdi.shifts_done);
 				}
                 if ( tap_number == 1 )
-					TDI1 = (*tdi.argument) & 0x01;
+					TDI1 = argument_byte & 0x01;
 				else
-					TDI2 = (*tdi.argument) & 0x01;
-                *tdi.argument = (*tdi.argument) >> 1;
+					TDI2 = argument_byte & 0x01;
+                argument_byte = argument_byte >> 1;
                 ++tdi.shifts_done;
                 if ( tdi.shifts_done >= 8  )
                 {
@@ -142,15 +256,29 @@ void tms(unsigned char value){
 								putchar_w(*tdo.argument);
 								putchar_w(tdo_read);
 							}
+							else
+							{  
+								putchar_w(TDO);
+								putchar_w(tdi.number_bytes);
+								putchar_w(*tdo.argument);
+							}
+							tdo_read = 0;
 							tdo.argument++;
 							mask.argument++;
 						}
+						putchar_w(TDI);
+						putchar_w(tdi.number_bytes);
+						putchar_w(*tdo.argument);
                         tdi.shifts_done = 0;
                         --tdi.number_bytes;
 						tdi.argument++;
+						argument_byte = *tdi.argument;
                    }
                 }
-	            
+				 #ifdef DEBUG
+	            putstring("TMS ");
+				putchar_w('0'+value);
+				 #endif
 				tap1_clock(  value  );
 				if ( value == 1 )
 				{
@@ -163,7 +291,17 @@ void tms(unsigned char value){
 							putchar_w(*tdo.argument);
 							putchar_w(tdo_read);
 						}
+						else
+						{
+							putchar_w(TDO);
+							putchar_w(tdi.number_bytes);
+							putchar_w(*tdo.argument);
+						}
+						tdo_read = 0;
 					}
+					putchar_w(TDI);
+					putchar_w(tdi.number_bytes);
+					putchar_w(*tdo.argument);
 					state = NORMAL; // if TMS = 1 we are not shifting anymore.
 				}
 			 
@@ -179,6 +317,7 @@ void get_tdi(){
 	tdi.number_bytes = buffer[++iter];
 	++iter;
 	tdi.argument  = &buffer[iter];
+	argument_byte = *tdi.argument;
 	tdi.shifts_done = 0;
 	iter += tdi.number_bytes;
 	state = STATE_TDI;
@@ -190,6 +329,7 @@ void get_tdo(){
 	++iter;
 	tdo.argument  = &buffer[iter];
 	tdo.shifts_done = 0;
+	tdo_read = 0;
 	iter += tdo.number_bytes;   
 	putchar_w(ACK);
 }
@@ -206,8 +346,17 @@ void get_mask(){
 
 void run_seltap(){
 	++iter; //go over the identifier
-	++iter; //Going over the number of bytes
     tap_number = buffer[++iter];
+	++iter;
 	putchar_w(ACK);
 //	putdigit(tap_number);
+}
+
+void debug_parser(){
+ 	iter = 0;
+	while(iter < size ){
+		puthexdigit_w( buffer[iter] );
+		++iter;
+	}	
+	iter = 0;
 }
