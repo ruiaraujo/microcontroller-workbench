@@ -190,9 +190,13 @@ public class TapStateMachine {
         ret.addAll(possibleStates.keySet());
         return ret;
     }
-
-    public static Instruction getResetInstructions() {
-        return new Instruction(Command.TMS1, (byte)1, 5L);
+    
+    private final static List<Instruction> resetIns = new ArrayList<Instruction>();
+    
+    public static List<Instruction> getResetInstructions() {
+    	if ( resetIns.size() == 0 )
+    		resetIns.add(new Instruction(Command.TMS1, (byte)1, 5L));
+    	return resetIns;
     }
     
     public void reset(){

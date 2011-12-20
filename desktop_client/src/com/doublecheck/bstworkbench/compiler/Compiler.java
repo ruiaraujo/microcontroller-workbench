@@ -25,7 +25,7 @@ public class Compiler {
         int size = rSyntaxDocument.getLineCount();
         TapStateMachine state = TapStateMachine.getInstance();
         state.reset();
-        result.addInitialInstructions(TapStateMachine.getResetInstructions()); 
+        result.addInstructions(0,TapStateMachine.getResetInstructions()); 
         for ( int i = 0 ; i < size ; ++i  )
         {
             Token tok = rSyntaxDocument.getTokenListForLine(i);

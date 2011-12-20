@@ -34,10 +34,6 @@ public class CompilationResult {
     		compiledOutput.add(i.toFile());
     }
     
-    public void addInitialInstructions(Instruction ins){
-    	instructionList.add(0,ins);
-    	compiledOutput.add(0,ins.toFile());
-    }
     
     public List<Integer> validLines(){
     	return new ArrayList<Integer>(instructions.keySet());

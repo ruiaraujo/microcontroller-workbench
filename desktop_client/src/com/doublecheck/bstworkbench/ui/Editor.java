@@ -799,10 +799,22 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
 	@Override
 	public void onAckReceived() {
 		instructionRunned++;
-		if ( instructionRunned >= compiledOutput.getInstructions(validLines.get(currentLine)).size() )
+		final List<Instruction> instructions = compiledOutput.getInstructions(validLines.get(currentLine));
+		if ( instructionRunned >= instructions.size() )
 		{
 			instructionRunned = 0;
-			currentLine++;
+			do {
+				currentLine++;
+				if ( currentLine >=  validLines.size() )
+				{
+					SwingUtilities.invokeLater(new Runnable() {
+			            public void run() {
+			            	changeLog.append("Finished running.\n");
+			            }
+					});
+					return;
+				}
+			}while(compiledOutput.getInstructions(validLines.get(currentLine)).size() == 0);
 			final int line = validLines.get(currentLine);
 			SwingUtilities.invokeLater(new Runnable() {
 	            public void run() {
@@ -819,7 +831,7 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
 	public void onErrorAckReceived(final  String received  , final  String expected) {
 		SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-            	changeLog.append("Error detected.\n");
+            	changeLog.append("ERROR DETECTED.\n");
 				changeLog.append("Expected: ");
 				changeLog.append(expected);
 				changeLog.append("\n");	

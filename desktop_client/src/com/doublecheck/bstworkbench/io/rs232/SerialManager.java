@@ -21,7 +21,7 @@ public class SerialManager implements MicrocontrollerManager {
 
 	private State state;
 	private enum State {
-		RUNNING, PAUSED, TDO, TDI,  DEBUG, UPLOADING, READING_SIZE , ERROR ;
+		RUNNING, PAUSED, TDO, TDI,  DEBUG, UPLOADING, READING_SIZE , TDO_READ ;
 	};
 	
     private class SerialInputListener implements Runnable,
@@ -33,7 +33,7 @@ public class SerialManager implements MicrocontrollerManager {
     	private byte [] tdo;
     	private byte [] tdoError;
     	private boolean hadError = false;
-    	
+    	private boolean doNotWriteOnError = false;
         private boolean stop = false;
 
         private SerialInputListener() throws TooManyListenersException {
@@ -89,8 +89,13 @@ public class SerialManager implements MicrocontrollerManager {
                         			state = State.TDI;
                         		else if ( readBuffer[i] == 'f' )
                         			state = State.TDO;
+                        		else if ( readBuffer[i] == 'x' )
+                        			state = State.TDO_READ;
                         		else if ( readBuffer[i] == 'e' )
-                        			state = State.ERROR;
+                        		{
+                        			hadError = true;
+                        			state = State.TDO_READ;
+                        		}
                         		break;
                         	}
                         	case UPLOADING:{
@@ -107,35 +112,37 @@ public class SerialManager implements MicrocontrollerManager {
                         		state = State.RUNNING; break;
                         	}
                         	case TDI:{
-                        		tdi[tdi.length-numberBytesTdi] = readBuffer[i];
+                        		tdi[numberBytesTdi-1] = readBuffer[i];
                         		--numberBytesTdi;
                         		if ( numberBytesTdi == 0 )
                         		{
-                        			listeners.onTDOReceived(StringUtils.getHexString(tdi));
+                        			listeners.onTDISent(StringUtils.getHexString(tdi));
                         		}
                         		state = State.RUNNING;
                         		break;
                         	}
                         	case TDO:{
-                        		tdo[tdo.length-numberBytesTdo] = readBuffer[i];
-                        		tdoError[tdoError.length-numberBytesTdo] = readBuffer[i];
+                        		tdo[numberBytesTdo-1] = readBuffer[i];
                         		--numberBytesTdo;
-                        		if ( numberBytesTdo == 0 && !hadError)
+                        		if ( numberBytesTdo == 0)
                         		{
-                        			listeners.onTDOReceived(StringUtils.getHexString(tdo));
+                        			if ( hadError )
+                        			{
+                        				listeners.onErrorAckReceived(StringUtils.getHexString(tdoError),
+       										 StringUtils.getHexString(tdo));
+                        				hadError = false;
+                                		state = State.RUNNING;
+                        				return;
+                        			}
+                        			else
+                        				listeners.onTDOReceived(StringUtils.getHexString(tdo));
+                        			
                         		}
                         		state = State.RUNNING;
                         		break;
                         	}
-                        	case ERROR:{
-                        		tdoError[tdoError.length-numberBytesTdo-1] = readBuffer[i];
-                        		hadError = true;
-                        		if ( numberBytesTdo == 0 )
-                        		{
-                        			hadError = false;
-                        			listeners.onErrorAckReceived(StringUtils.getHexString(tdoError),
-                        										 StringUtils.getHexString(tdo));
-                        		}
+                        	case TDO_READ:{
+                        		tdoError[numberBytesTdo-1] = readBuffer[i];
                         		state = State.RUNNING;
                         		break;
                         	}
