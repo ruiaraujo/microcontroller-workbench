@@ -6,7 +6,7 @@
 #define STATE_TDI 1
 #define STATE_TDO 2
 
-#define DEBUG 1
+//#define DEBUG 1
 #define COD_TMS0 0
 #define COD_TMS1 1
 #define COD_TDI 2
@@ -21,6 +21,9 @@
 #define ERROR_ACK 'e'
 #define TDO 'f'
 #define TDI 't'
+#define SIZE 's'
+#define NO_ERROR_TDO 'x'
+
 
 unsigned char xdata buffer [BUFFER_SIZE];
 
@@ -42,6 +45,16 @@ unsigned int size;
 static unsigned char state  = NORMAL;
 
 
+unsigned char number_bytes;
+unsigned char argument_byte;
+unsigned long int argument;
+
+unsigned char has_error= 0;
+unsigned char should_stop= 0;
+unsigned char i_hate_tdo = 0 ;
+
+
+
 
 void update_prog_size(unsigned int prog_size ){
 	size = prog_size;
@@ -55,11 +68,12 @@ void stop(){//this is one way of stopping the run loop below.
 void step(){   
 	if ( iter >= size )
 	{
-	
+	#ifdef DEBUG
 		putstring("itr: ");
 		puthexdigit_w(iter/100);
 		puthexdigit_w((iter%100)/10 );
 		puthexdigit_w(iter%10);
+	#endif
 		return;
 	}
 	#ifdef DEBUG
@@ -77,10 +91,14 @@ void step(){
 
 void run(){
 	iter = 0;
+	has_error = 0;
+	should_stop = 0;
     state = NORMAL;
 	while(iter < size ){ 
 		wait();
 		step();
+		if ( should_stop == 1 )
+			break;
 		wait();
 		wait();
 		wait();
@@ -173,11 +191,16 @@ void run(){
 		wait();
 
 	}
+	#ifdef DEBUG
 	putstring("itr: ");
 	puthexdigit_w(iter/100);
 	puthexdigit_w((iter%100)/10 );
 	puthexdigit_w(iter%10);
+	#endif
 	iter = 0;
+	
+	has_error = 0;
+	should_stop = 0;
     state = NORMAL;		
 }
 
@@ -196,13 +219,6 @@ static void tap1_clock(unsigned char value ){
                 TCK2 = 0;
         }
 }
-
-unsigned char number_bytes;
-unsigned char argument_byte;
-unsigned long int argument;
-
-
-unsigned char i_hate_tdo = 0 ;
 
 void tms(unsigned char value){
         unsigned char i;
@@ -253,27 +269,36 @@ void tms(unsigned char value){
 						{
 					   		if ( APPLY_MASK(*data_to_shift.tdo) != APPLY_MASK(tdo_read) )
 							{
+								has_error = 1;
 								putchar_w(ERROR_ACK);
-								putchar_w(data_to_shift.number_bytes);
-								putchar_w(*data_to_shift.tdo);
-								putchar_w(tdo_read);
 							}
 							else
-							{  
-								putchar_w(TDO);	
+							{
+								putchar_w(NO_ERROR_TDO);  
+							}							
+							#ifdef DEBUG
+							putchar_w(data_to_shift.number_bytes);
+							putchar_w(*data_to_shift.tdo);
+							#endif
+							putchar_w(tdo_read);
+							
+							putchar_w(TDO);	
+							#ifdef DEBUG
 								putchar_w(ERROR_ACK);
 								putchar_w(data_to_shift.number_bytes);
 								putchar_w(*data_to_shift.tdo);
-								putchar_w(*data_to_shift.tdo);
-							}
+							#endif
+							putchar_w(*data_to_shift.tdo);
 							tdo_read = 0;
 							data_to_shift.tdo++;
 							data_to_shift.mask++;
 						}
 						putchar_w(TDI);
+				#ifdef DEBUG
 						putchar_w(ERROR_ACK);
 						putchar_w(data_to_shift.number_bytes);
 						putchar_w(*data_to_shift.tdi);
+				#endif
 						putchar_w(*data_to_shift.tdi);
                         data_to_shift.shifts_done = 0;
                         --data_to_shift.number_bytes;
@@ -292,27 +317,45 @@ void tms(unsigned char value){
 					{
 						if ( APPLY_MASK(*data_to_shift.tdo) != APPLY_MASK(tdo_read) )
 						{
+							has_error = 1;
 							putchar_w(ERROR_ACK);
-							putchar_w(data_to_shift.number_bytes);
-							putchar_w(*data_to_shift.tdo);
-							putchar_w(tdo_read);
 						}
 						else
 						{
-							putchar_w(TDO);
-								putchar_w(ERROR_ACK);	
+							putchar_w(NO_ERROR_TDO);  
+						}							
+						#ifdef DEBUG
+						putchar_w(data_to_shift.number_bytes);
+						putchar_w(*data_to_shift.tdo);
+						#endif
+						putchar_w(tdo_read);
+						
+						putchar_w(TDO);	
+						#ifdef DEBUG
+							putchar_w(ERROR_ACK);
 							putchar_w(data_to_shift.number_bytes);
 							putchar_w(*data_to_shift.tdo);
-							putchar_w(*data_to_shift.tdo);
-						}
+						#endif
+						putchar_w(*data_to_shift.tdo);
 						tdo_read = 0;
 					}
 					putchar_w(TDI);	 
-								putchar_w(ERROR_ACK);
+				#ifdef DEBUG
+					putchar_w(ERROR_ACK);
 					putchar_w(data_to_shift.number_bytes);
 					putchar_w(*data_to_shift.tdi);
+				#endif
 					putchar_w(*data_to_shift.tdi);
 					state = NORMAL; // if TMS = 1 we are not shifting anymore.
+					if ( has_error == 1 )
+					{
+						should_stop = 1;
+					}
+					else
+					{
+						should_stop = 0;
+					}
+
 				}
 			 
 	        }
@@ -331,6 +374,8 @@ void get_tdi(){
 	data_to_shift.shifts_done = 0;
 	iter += data_to_shift.number_bytes;
 	state = STATE_TDI;
+	putchar_w(SIZE);
+	putchar_w(data_to_shift.number_bytes);
 	putchar_w(ACK);
 }	
 	

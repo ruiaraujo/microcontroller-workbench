@@ -27,8 +27,10 @@
 #define COD_STEP 't'
 #define COD_STOP 's'
 
+
 //#define DEBUG 1		 
 
+#define CHECK_SIZE() { if ( ptr >= 512 ) { state_parser = WAITING; putchar('o'); return; } }
 
 unsigned int ptr=0;
 unsigned char tam_arg =0;
@@ -87,7 +89,7 @@ void main()
 	buffer[32] = 2;
 	buffer[33] = 2;	 // sdr Tdi
 	buffer[34] = 3;
-	buffer[35] = 0x00;
+	buffer[35] = 0xf0;
 	buffer[36] = 0;
 	buffer[37] = 0;
 	buffer[38] = 3;
@@ -139,13 +141,20 @@ void serial (void) interrupt 4  {
 		key = SBUF;
 		RI = 0;
 		//P2 = key;
+	#ifdef DEBUG
 		if ( key < 10 )
 			putdigit(key);
 		else
 			putchar(key); //if the buffer is full, we don't care
+	#endif
 		if(state_parser == WAITING || state_parser == RUN ){
 			switch(key){
-				case COD_PROG_INIT:  state_parser=INI;ptr = 0; break;
+				case COD_PROG_INIT:  {
+					if( state_parser == RUN ) 
+						stop();
+					state_parser=INI;
+					ptr = 0;
+				} break;
 				case COD_RUN: state_parser=RUN; break;
 				case COD_STOP:	stop(); break;
 				case 'l': state_parser = DEBUG_PARSER; break;
@@ -159,23 +168,29 @@ void serial (void) interrupt 4  {
 				}
 				if ( key == 'f' )
 				{
+					state_parser = WAITING;
+				#ifdef DEBUG
 					 state_parser=DEBUG_PARSER;
-					 update_prog_size(ptr);
 					 putchar(ptr);
+				#endif
+					 update_prog_size(ptr);
 					 ptr = 0;
 				}	
 		}													
 		else if(state_parser == PARSING_INSTR){
+				CHECK_SIZE();
 		   		buffer[ptr++]=key;
 				state_parser = PARSING_TAMARG;	
 		}
 		else if(state_parser ==  PARSING_TAMARG){
+				CHECK_SIZE();
 				tam_arg = key;
 				buffer[ptr++]=key;
 				state_parser = PARSING_ARG;
 		}
 
 		else if(state_parser == PARSING_ARG){
+				CHECK_SIZE();
 				buffer[ptr++]=key;
 				--tam_arg;
 				if( tam_arg <= 0 ){
