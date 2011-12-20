@@ -4,7 +4,7 @@
 
 #define TBUF_SIZE	48		/* DO NOT CHANGE */
 
-static char tbuf [TBUF_SIZE];
+static volatile char tbuf [TBUF_SIZE];
 
 static volatile unsigned char t_in = 0;
 static volatile unsigned char t_out = 0;
@@ -30,7 +30,7 @@ char puthexdigit(unsigned char val){
 // to send a string.
 // it will block if th buffer is full
 void putstring( char * string ){
-	int i = 0;
+	unsigned int i = 0;
 	while ( string[i] != '\0')
 	{
 		while ( putchar(string[i]) )  //wait for space in the buffer
@@ -117,7 +117,7 @@ char putchar ( char character)
 	/*------------------------------------------------
 	If the buffer is full, return an error value.
 	------------------------------------------------*/
-	if ((TBUF_SIZE + 1) <= t_in )
+	if ( t_in >= TBUF_SIZE  )
 	{
 	  //P2 = 0xFF;	
 	  return (-1);

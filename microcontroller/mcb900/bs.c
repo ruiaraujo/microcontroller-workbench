@@ -6,6 +6,7 @@
 #define STATE_TDI 1
 #define STATE_TDO 2
 
+#define DEBUG 1
 #define COD_TMS0 0
 #define COD_TMS1 1
 #define COD_TDI 2
@@ -15,7 +16,7 @@
 #define COD_RUNTEST 6
 
 
-#define APPLY_MASK(X) ((X) & (*mask.argument))
+#define APPLY_MASK(X) ((X) & (*data_to_shift.mask))
 
 #define ERROR_ACK 'e'
 #define TDO 'f'
@@ -25,9 +26,11 @@ unsigned char xdata buffer [BUFFER_SIZE];
 
 static struct {
 	unsigned char number_bytes;
-	unsigned char * argument;
+	unsigned char * tdi;
+	unsigned char * tdo;
+	unsigned char * mask;
 	unsigned char shifts_done; 
-} tdi, tdo, mask;
+} data_to_shift;
 
 unsigned char tdo_read = 0;
 
@@ -184,7 +187,6 @@ static void tap1_clock(unsigned char value ){
         {
                 TMS1 = value;
                 TCK1 = 1;
-		//		wait();
                 TCK1 = 0;
         }
         else
@@ -235,44 +237,48 @@ void tms(unsigned char value){
 				{
 					 //tdo_read = tdo_read << 1 ;
 					 i_hate_tdo = (tap_number==1?TDO1:TDO2);
-					 tdo_read = tdo_read|(i_hate_tdo<<tdi.shifts_done);
+					 tdo_read = tdo_read|(i_hate_tdo<<data_to_shift.shifts_done);
 				}
                 if ( tap_number == 1 )
 					TDI1 = argument_byte & 0x01;
 				else
 					TDI2 = argument_byte & 0x01;
                 argument_byte = argument_byte >> 1;
-                ++tdi.shifts_done;
-                if ( tdi.shifts_done >= 8  )
+                ++data_to_shift.shifts_done;
+                if ( data_to_shift.shifts_done >= 8  )
                 {
-                   if ( tdi.number_bytes > 1 ) 
+                   if ( data_to_shift.number_bytes > 1 ) 
                    {
 				   		if ( state == STATE_TDO )
 						{
-					   		if ( APPLY_MASK(*tdo.argument) != APPLY_MASK(tdo_read) )
+					   		if ( APPLY_MASK(*data_to_shift.tdo) != APPLY_MASK(tdo_read) )
 							{
 								putchar_w(ERROR_ACK);
-								putchar_w(tdi.number_bytes);
-								putchar_w(*tdo.argument);
+								putchar_w(data_to_shift.number_bytes);
+								putchar_w(*data_to_shift.tdo);
 								putchar_w(tdo_read);
 							}
 							else
 							{  
-								putchar_w(TDO);
-								putchar_w(tdi.number_bytes);
-								putchar_w(*tdo.argument);
+								putchar_w(TDO);	
+								putchar_w(ERROR_ACK);
+								putchar_w(data_to_shift.number_bytes);
+								putchar_w(*data_to_shift.tdo);
+								putchar_w(*data_to_shift.tdo);
 							}
 							tdo_read = 0;
-							tdo.argument++;
-							mask.argument++;
+							data_to_shift.tdo++;
+							data_to_shift.mask++;
 						}
 						putchar_w(TDI);
-						putchar_w(tdi.number_bytes);
-						putchar_w(*tdo.argument);
-                        tdi.shifts_done = 0;
-                        --tdi.number_bytes;
-						tdi.argument++;
-						argument_byte = *tdi.argument;
+						putchar_w(ERROR_ACK);
+						putchar_w(data_to_shift.number_bytes);
+						putchar_w(*data_to_shift.tdi);
+						putchar_w(*data_to_shift.tdi);
+                        data_to_shift.shifts_done = 0;
+                        --data_to_shift.number_bytes;
+						data_to_shift.tdi++;
+						argument_byte = *data_to_shift.tdi;
                    }
                 }
 				 #ifdef DEBUG
@@ -284,24 +290,28 @@ void tms(unsigned char value){
 				{
 					if ( state == STATE_TDO )
 					{
-						if ( APPLY_MASK(*tdo.argument) != APPLY_MASK(tdo_read) )
+						if ( APPLY_MASK(*data_to_shift.tdo) != APPLY_MASK(tdo_read) )
 						{
 							putchar_w(ERROR_ACK);
-							putchar_w(tdi.number_bytes);
-							putchar_w(*tdo.argument);
+							putchar_w(data_to_shift.number_bytes);
+							putchar_w(*data_to_shift.tdo);
 							putchar_w(tdo_read);
 						}
 						else
 						{
 							putchar_w(TDO);
-							putchar_w(tdi.number_bytes);
-							putchar_w(*tdo.argument);
+								putchar_w(ERROR_ACK);	
+							putchar_w(data_to_shift.number_bytes);
+							putchar_w(*data_to_shift.tdo);
+							putchar_w(*data_to_shift.tdo);
 						}
 						tdo_read = 0;
 					}
-					putchar_w(TDI);
-					putchar_w(tdi.number_bytes);
-					putchar_w(*tdo.argument);
+					putchar_w(TDI);	 
+								putchar_w(ERROR_ACK);
+					putchar_w(data_to_shift.number_bytes);
+					putchar_w(*data_to_shift.tdi);
+					putchar_w(*data_to_shift.tdi);
 					state = NORMAL; // if TMS = 1 we are not shifting anymore.
 				}
 			 
@@ -314,32 +324,29 @@ void tms(unsigned char value){
 
 
 void get_tdi(){
-	tdi.number_bytes = buffer[++iter];
+	data_to_shift.number_bytes = buffer[++iter];
 	++iter;
-	tdi.argument  = &buffer[iter];
-	argument_byte = *tdi.argument;
-	tdi.shifts_done = 0;
-	iter += tdi.number_bytes;
+	data_to_shift.tdi  = &buffer[iter];
+	argument_byte = *data_to_shift.tdi;
+	data_to_shift.shifts_done = 0;
+	iter += data_to_shift.number_bytes;
 	state = STATE_TDI;
 	putchar_w(ACK);
 }	
 	
 void get_tdo(){
-	tdo.number_bytes = buffer[++iter];
 	++iter;
-	tdo.argument  = &buffer[iter];
-	tdo.shifts_done = 0;
-	tdo_read = 0;
-	iter += tdo.number_bytes;   
+	++iter;
+	data_to_shift.tdo  = &buffer[iter];
+	iter += data_to_shift.number_bytes;   
 	putchar_w(ACK);
 }
 
 void get_mask(){
-	mask.number_bytes = buffer[++iter];
 	++iter;
-	mask.argument  = &buffer[iter];
-	mask.shifts_done = 0;
-	iter += mask.number_bytes; 
+	++iter;
+	data_to_shift.mask  = &buffer[iter];
+	iter += data_to_shift.number_bytes; 
 	state = STATE_TDO;
 	putchar_w(ACK);
 }
@@ -355,8 +362,9 @@ void run_seltap(){
 void debug_parser(){
  	iter = 0;
 	while(iter < size ){
-		puthexdigit_w( buffer[iter] );
+		putchar_w( buffer[iter] );
 		++iter;
-	}	
+	}
+		
 	iter = 0;
 }

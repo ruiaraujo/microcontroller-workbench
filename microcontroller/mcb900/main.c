@@ -52,7 +52,7 @@ void main()
 	state_parser = WAITING;
 #ifdef DEBUG
 	state_parser = RUN;
-	buffer[0] = 1;
+	buffer[0] = 1;	  
 	buffer[1] = 1;
 	buffer[2] = 5;
 	buffer[3] = 5;
@@ -81,37 +81,37 @@ void main()
 	buffer[26] = 7;
 	buffer[27] = 1;
 	buffer[28] = 1;
-	buffer[29] = 2;
+	buffer[29] = 3;
 	buffer[30] = 0;
 	buffer[31] = 1;
-	buffer[32] = 1;
-	buffer[33] = 1;
-	buffer[34] = 1;
-	buffer[35] = 1;
+	buffer[32] = 2;
+	buffer[33] = 2;	 // sdr Tdi
+	buffer[34] = 3;
+	buffer[35] = 0x00;
 	buffer[36] = 0;
-	buffer[37] = 1;
-	buffer[38] = 2;
-	buffer[39] = 2;
-	buffer[40] = 3;
-	buffer[41] = 0xff;
+	buffer[37] = 0;
+	buffer[38] = 3;
+	buffer[39] = 3;
+	buffer[40] = 0;
+	buffer[41] = 0x0f;
 	buffer[42] = 0;
-	buffer[43] = 0;
-	buffer[44] = 0;
-	buffer[45] = 1;
-	buffer[46] = 17;
-	buffer[47] = 1;
-	buffer[48] = 1;
-	buffer[49] = 2;
-	buffer[50] = 0;
+	buffer[43] = 4;
+	buffer[44] = 3;
+	buffer[45] = 0xf7;
+	buffer[46] = 0xff;
+	buffer[47] = 0xff;
+	buffer[48] = 0;
+	buffer[49] = 1;
+	buffer[50] = 17;
 	buffer[51] = 1;
 	buffer[52] = 1;
-	update_prog_size(53);  
+	buffer[53] = 2;
+	update_prog_size(54);  
 #endif
 	while(1)
 	{
 		if(state_parser == RUN){
 			run();
-			//while(1)step();
 			state_parser = WAITING;
 		}
 		if ( state_parser == STEP ){
