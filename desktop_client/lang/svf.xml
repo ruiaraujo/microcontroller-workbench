@@ -107,58 +107,58 @@
 		
 	</params>
 	<desc>Sets the TAP controller to the state specified in the argument.</desc>
-</keyword>
-
-<keyword name="reset" type="constant" definedIn="API v1">
-	<desc>State reset.</desc>
-</keyword>
-<keyword name="idle" type="constant" definedIn="API v1">
-	<desc>State idle.</desc>
-</keyword>
-<keyword name="select-dr" type="constant" definedIn="API v1">
-	<desc>State select-dr.</desc>
-</keyword>
-<keyword name="capture-dr" type="constant" definedIn="API v1">
-	<desc>State capture-dr.</desc>
-</keyword>
-<keyword name="shift-dr" type="constant" definedIn="API v1">
-	<desc>State shift-dr.</desc>
-</keyword>
-<keyword name="exit1-dr" type="constant" definedIn="API v1">
-	<desc>State exit1-dr.</desc>
-</keyword>
-<keyword name="pause" type="constant" definedIn="API v1">
-	<desc>State pause.</desc>
-</keyword>
-<keyword name="exit2-dr" type="constant" definedIn="API v1">
-	<desc>State exit2-dr.</desc>
-</keyword>
-<keyword name="update-dr" type="constant" definedIn="API v1">
-	<desc>State update-dr.</desc>
-</keyword>
-
-
-<keyword name="select-ir" type="constant" definedIn="API v1">
-	<desc>State select-ir.</desc>
-</keyword>
-<keyword name="capture-ir" type="constant" definedIn="API v1">
-	<desc>State capture-ir.</desc>
-</keyword>
-<keyword name="shift-ir" type="constant" definedIn="API v1">
-	<desc>State shift-ir.</desc>
-</keyword>
-<keyword name="exit1-ir" type="constant" definedIn="API v1">
-	<desc>State exit1-ir.</desc>
-</keyword>
-<keyword name="pause" type="constant" definedIn="API v1">
-	<desc>State pause.</desc>
-</keyword>
-<keyword name="exit2-ir" type="constant" definedIn="API v1">
-	<desc>State exit2-ir.</desc>
-</keyword>
-<keyword name="update-ir" type="constant" definedIn="API v1">
-	<desc>State update-ir.</desc>
-</keyword>
+	</keyword>
+	
+	<keyword name="reset" type="constant" definedIn="API v1">
+		<desc>State reset.</desc>
+	</keyword>
+	<keyword name="idle" type="constant" definedIn="API v1">
+		<desc>State idle.</desc>
+	</keyword>
+	<keyword name="select-dr" type="constant" definedIn="API v1">
+		<desc>State select-dr.</desc>
+	</keyword>
+	<keyword name="capture-dr" type="constant" definedIn="API v1">
+		<desc>State capture-dr.</desc>
+	</keyword>
+	<keyword name="shift-dr" type="constant" definedIn="API v1">
+		<desc>State shift-dr.</desc>
+	</keyword>
+	<keyword name="exit1-dr" type="constant" definedIn="API v1">
+		<desc>State exit1-dr.</desc>
+	</keyword>
+	<keyword name="pause-dr" type="constant" definedIn="API v1">
+		<desc>State pause-dr.</desc>
+	</keyword>
+	<keyword name="exit2-dr" type="constant" definedIn="API v1">
+		<desc>State exit2-dr.</desc>
+	</keyword>
+	<keyword name="update-dr" type="constant" definedIn="API v1">
+		<desc>State update-dr.</desc>
+	</keyword>
+	
+	
+	<keyword name="select-ir" type="constant" definedIn="API v1">
+		<desc>State select-ir.</desc>
+	</keyword>
+	<keyword name="capture-ir" type="constant" definedIn="API v1">
+		<desc>State capture-ir.</desc>
+	</keyword>
+	<keyword name="shift-ir" type="constant" definedIn="API v1">
+		<desc>State shift-ir.</desc>
+	</keyword>
+	<keyword name="exit1-ir" type="constant" definedIn="API v1">
+		<desc>State exit1-ir.</desc>
+	</keyword>
+	<keyword name="pause-ir" type="constant" definedIn="API v1">
+		<desc>State pause-ir.</desc>
+	</keyword>
+	<keyword name="exit2-ir" type="constant" definedIn="API v1">
+		<desc>State exit2-ir.</desc>
+	</keyword>
+	<keyword name="update-ir" type="constant" definedIn="API v1">
+		<desc>State update-ir.</desc>
+	</keyword>
 
 	</keywords>
 
