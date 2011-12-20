@@ -107,7 +107,7 @@ public class SdrCommand extends Command {
         //Checking for TDO ( optional )
         tok = tok.getNextToken(); // byte count
         if ( tok == null || tok.type == Token.NULL  )
-            return new SirCommand(numberBytes,tdi, tdo, mask);
+            return new SdrCommand(numberBytes,tdi, tdo, mask);
         if ( !tok.getLexeme().equalsIgnoreCase(TDO) )
             throw new CompilerException("Unexpected token after TDI.");
         args = getArgument(tok,TDO );
