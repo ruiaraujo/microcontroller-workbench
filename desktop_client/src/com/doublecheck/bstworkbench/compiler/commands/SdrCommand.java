@@ -106,7 +106,8 @@ public class SdrCommand extends Command {
         
         //Checking for TDO ( optional )
         tok = tok.getNextToken(); // byte count
-        if ( tok == null || tok.type == Token.NULL  )
+        if ( tok == null || tok.type == Token.NULL  || 
+        	tok.type == Token.COMMENT_EOL || tok.type == Token.COMMENT_MULTILINE )
             return new SdrCommand(numberBytes,tdi, tdo, mask);
         if ( !tok.getLexeme().equalsIgnoreCase(TDO) )
             throw new CompilerException("Unexpected token after TDI.");
@@ -120,7 +121,8 @@ public class SdrCommand extends Command {
         
         //Checking for MASK( optional )
         tok = tok.getNextToken(); // byte count
-        if ( tok == null || tok.type == Token.NULL  )
+        if ( tok == null || tok.type == Token.NULL  || 
+            	tok.type == Token.COMMENT_EOL || tok.type == Token.COMMENT_MULTILINE  )
             return new SdrCommand(numberBytes,tdi, tdo, mask);
 
         if ( !tok.getLexeme().equalsIgnoreCase(MASK) )
