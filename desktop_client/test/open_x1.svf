@@ -1,0 +1,12 @@
+seltap 2
+
+STATE reset
+
+
+sir 16 tdi(0000) tdo(8181) 
+
+sdr 18 tdi(00040)
+
+sdr 18 tdi(00000) tdo(0D200) mask(0FF00) 
+
+

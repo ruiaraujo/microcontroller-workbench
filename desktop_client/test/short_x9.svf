@@ -1,0 +1,14 @@
+seltap 2
+
+
+sir 16 tdi(0002) tdo(8181) 
+
+sdr 18 tdi(0000A)
+
+seltap 1
+
+sir 8 tdi(00) tdo(81) 
+
+sdr 18 tdi(00000) TDO(00A00) mask(00f00)
+
+

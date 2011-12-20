@@ -1,0 +1,5 @@
+seltap 1
+
+sir 8 tdi(00) tdo(81)
+
+sdr 18 tdi(00055) tdo(00f00)
