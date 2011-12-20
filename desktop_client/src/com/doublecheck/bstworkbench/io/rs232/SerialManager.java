@@ -22,7 +22,7 @@ public class SerialManager implements MicrocontrollerManager {
 
 	private State state;
 	private enum State {
-		RUNNING, PAUSED, TDO, TDI, TDO_TDI;
+		RUNNING, PAUSED, TDO, TDI, TDO_TDI, DEBUG;
 	};
 	
     private class SerialInputListener implements Runnable,
@@ -85,6 +85,13 @@ public class SerialManager implements MicrocontrollerManager {
                     	System.out.println(input);
                     }
                     else
+                    	if ( state == State.DEBUG )
+                    	{
+                    		for ( int i = 0  ;  i < readBuffer.length; ++i )
+                    			System.out.print(StringUtils.getHexString(readBuffer[i]));
+
+                    	}
+                    	else	
                     	System.out.println(input);
                 } catch (final IOException e) {
                     e.printStackTrace();
@@ -249,6 +256,22 @@ public class SerialManager implements MicrocontrollerManager {
         }
         
     }
+    
+
+    public void debugProgram() {
+        if (!connected)
+            return;
+        state = State.DEBUG;
+        try {
+            outputStream.write('l');
+            outputStream.flush();
+        } catch (final IOException e) {
+            e.printStackTrace();
+            disconnect();
+        }
+        
+    }
+
 
     @Override
     public void stepProgram() {

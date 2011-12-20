@@ -616,6 +616,7 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
                 }
             }
             manager.stopProgram();
+          //  ((SerialManager)manager).debugProgram();
         }
     }
     
