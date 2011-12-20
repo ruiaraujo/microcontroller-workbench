@@ -359,12 +359,13 @@ public class SerialManager implements MicrocontrollerManager {
 
 
     @Override
-    public void stepProgram() {
+    public void stepProgram(int steps) {
         if (!connected)
             return;
         try {
         	state = State.RUNNING;
-            outputStream.write('t');
+        	for ( int i = 0 ; i < steps ; ++i )
+        		outputStream.write('t');
             outputStream.flush();
         } catch (final IOException e) {
             e.printStackTrace();

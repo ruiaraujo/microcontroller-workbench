@@ -521,6 +521,8 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
 					e1.printStackTrace();
 				}
 				compiledOutput = compiler.getResult();
+	            validLines = compiledOutput.validLines();
+	            currentLine = 0;
 				final List<byte[]> dataToBeSent = compiledOutput.getOutputFile();
 				if ( DEBUG )
                 {
@@ -575,10 +577,13 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
                 changeLog.append("Please compile first.\n");
                 return;
             }
+            
         	manager.initProgramming();
         	for ( byte[] b : compiledOutput.getOutputFile() )
         			manager.write(b);
         	manager.finishProgram();
+            validLines = compiledOutput.validLines();
+            currentLine = 0;
             changeLog.append("Finished uploading.\n");
         }
         
@@ -664,7 +669,7 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
                     return ;
                 }
             }
-            manager.stepProgram();
+            manager.stepProgram(compiledOutput.getInstructions(validLines.get(currentLine)).size());
         }
     }
     //File Management Actions and functions
@@ -812,13 +817,15 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
 			            	changeLog.append("Finished running.\n");
 			            }
 					});
+		            validLines = compiledOutput.validLines();
+		            currentLine = 0;
 					return;
 				}
 			}while(compiledOutput.getInstructions(validLines.get(currentLine)).size() == 0);
 			final int line = validLines.get(currentLine);
 			SwingUtilities.invokeLater(new Runnable() {
 	            public void run() {
-	            	changeLog.append("Line ");
+	            	changeLog.append("Running Line ");
 					changeLog.append(Integer.toString(line));
 					changeLog.append("\n");
 	            }

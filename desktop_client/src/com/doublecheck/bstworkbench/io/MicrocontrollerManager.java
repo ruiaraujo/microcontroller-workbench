@@ -15,7 +15,7 @@ public interface MicrocontrollerManager {
     
     public void stopProgram();
     
-    public void stepProgram();
+    public void stepProgram(int steps);
     
     public void write(byte[] b);
     
