@@ -59,6 +59,9 @@ unsigned char i_hate_tdo = 0 ;
 void update_prog_size(unsigned int prog_size ){
 	size = prog_size;
 	iter = 0;
+	has_error = 0;
+	should_stop = 0;
+    state = NORMAL;
 }
 
 void stop(){//this is one way of stopping the run loop below.
@@ -74,6 +77,11 @@ void step(){
 		puthexdigit_w((iter%100)/10 );
 		puthexdigit_w(iter%10);
 	#endif
+	
+		iter = 0;
+		has_error = 0;
+		should_stop = 0;
+	    state = NORMAL;
 		return;
 	}
 	#ifdef DEBUG
@@ -90,10 +98,6 @@ void step(){
 }
 
 void run(){
-	iter = 0;
-	has_error = 0;
-	should_stop = 0;
-    state = NORMAL;
 	while(iter < size ){ 
 		wait();
 		step();
