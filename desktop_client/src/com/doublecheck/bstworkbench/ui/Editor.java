@@ -35,6 +35,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 
@@ -54,6 +55,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 
 import com.doublecheck.bstworkbench.Resources;
+import com.doublecheck.bstworkbench.compiler.CompilationResult;
 import com.doublecheck.bstworkbench.compiler.Compiler;
 import com.doublecheck.bstworkbench.compiler.Instruction;
 import com.doublecheck.bstworkbench.compiler.commands.Command;
@@ -65,6 +67,10 @@ import com.doublecheck.bstworkbench.io.rs232.SerialManager;
 public class Editor extends JFrame  implements  SyntaxConstants , 
 												MicrocontrollerManager.AcknowledgementListener{
 
+	public static boolean DEBUG = false;
+	
+	
+	
     private final static String TITLE = "Microcontroller Workbench";
 
     private RTextScrollPane scrollPane;
@@ -94,6 +100,8 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
     private final Action newFileAction;
 
     private boolean edited = false;
+    
+    
     public Editor() {
         super(TITLE+ " - New File");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -481,6 +489,7 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
         }
 
         public void actionPerformed(ActionEvent e) {
+        	compiledOutput = null;
             if ( textArea.getText().trim().length() == 0 )
             {
                 changeLog.append("There is nothing to compile\n");
@@ -500,20 +509,27 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
             else
             {
                 changeLog.append("Compiled successfully\n");
-                for ( Command s : compiler.getCommands() )
-                    changeLog.append(s.toString()+'\n');
+                if ( DEBUG )
+                {
+	                for ( Command s : compiler.getCommands() )
+	                    changeLog.append(s.toString()+'\n');
+                }
                 FileOutputStream os = null;
                 try {
 					os = new FileOutputStream(new File("compiled.o"));
 				} catch (FileNotFoundException e1) {
 					e1.printStackTrace();
 				}
-				compiledOutput = compiler.getResult().getOutputFile();
-                for ( Instruction s : compiler.getResult().getInstructions() )
+				compiledOutput = compiler.getResult();
+				final List<byte[]> dataToBeSent = compiledOutput.getOutputFile();
+				if ( DEBUG )
                 {
-                    changeLog.append(s.toString()+'\n');
+					for ( Instruction s : compiledOutput.getInstructions() )
+	                {
+	                    changeLog.append(s.toString()+'\n');
+	                }
                 }
-                for ( byte[] b : compiledOutput )
+                for ( byte[] b : dataToBeSent )
                 {
                 	try {
 						os.write(b);
@@ -531,7 +547,7 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
         }
     }
     
-    private List<byte[]> compiledOutput;
+    private CompilationResult compiledOutput;
     
     class UploadAction extends AbstractAction {
         public UploadAction() {
@@ -554,15 +570,16 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
                     return ;
                 }
             }
-            if ( compiledOutput.size() == 0 )
+            if ( compiledOutput == null )
             {
                 changeLog.append("Please compile first.\n");
                 return;
             }
-        	manager.initProgram();
-        	for ( byte[] b : compiledOutput )
+        	manager.initProgramming();
+        	for ( byte[] b : compiledOutput.getOutputFile() )
         			manager.write(b);
         	manager.finishProgram();
+            changeLog.append("Finished uploading.\n");
         }
         
     }
@@ -589,7 +606,10 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
                     return ;
                 }
             }
+            validLines = compiledOutput.validLines();
+            currentLine = 0;
             manager.runProgram();
+            changeLog.append("Starting test.\n");
         }
     }
     
@@ -616,6 +636,8 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
                 }
             }
             manager.stopProgram();
+
+            changeLog.append("Stopping test.\n");
           //  ((SerialManager)manager).debugProgram();
         }
     }
@@ -771,28 +793,76 @@ public class Editor extends JFrame  implements  SyntaxConstants ,
         }
 
     }
-
+    private List<Integer> validLines;
+    private int currentLine = 0;
+    private int instructionRunned = 0;
+	@Override
 	public void onAckReceived() {
-		// TODO Auto-generated method stub
+		instructionRunned++;
+		if ( instructionRunned >= compiledOutput.getInstructions(validLines.get(currentLine)).size() )
+		{
+			instructionRunned = 0;
+			currentLine++;
+			final int line = validLines.get(currentLine);
+			SwingUtilities.invokeLater(new Runnable() {
+	            public void run() {
+	            	changeLog.append("Line ");
+					changeLog.append(Integer.toString(line));
+					changeLog.append("\n");
+	            }
+			});
+		}
+		
+	}
+
+	@Override
+	public void onErrorAckReceived(final  String received  , final  String expected) {
+		SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	changeLog.append("Error detected.\n");
+				changeLog.append("Expected: ");
+				changeLog.append(expected);
+				changeLog.append("\n");	
+				changeLog.append("Received: ");
+				changeLog.append(received);
+				changeLog.append("\n");
+            }
+		});
+	}
+
+	@Override
+	public void onTDISent(final String received) {
+		SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+				changeLog.append("Sent: ");
+				changeLog.append(received);
+				changeLog.append("\n");
+            }
+		});
+	}
+
+	@Override
+	public void onTDOReceived(final String received) {
+		SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	changeLog.append("Received: ");
+        		changeLog.append(received);
+        		changeLog.append("\n");
+            }
+		});
+            
 		
 	}
 
 
-	public void onErrorAckReceived() {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	public void onTDISent(String received) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	public void onTDOReceived(String received) {
-		// TODO Auto-generated method stub
-		
+	public void onOutOfMemory() {
+		SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	changeLog.append("Error detected.\n");
+            	changeLog.append("The program is too big.\n");
+        		changeLog.append("Try doing less test in one file.\n");
+            }
+		});
 	}
    
 }

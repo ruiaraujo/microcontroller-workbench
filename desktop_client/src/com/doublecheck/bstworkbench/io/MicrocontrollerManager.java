@@ -9,7 +9,7 @@ public interface MicrocontrollerManager {
 
     public void finishProgram();
 
-    public void initProgram();
+    public void initProgramming();
 
     public void runProgram();
     
@@ -32,6 +32,9 @@ public interface MicrocontrollerManager {
     	
     	public void onTDISent( String received );
     	
-    	public void onErrorAckReceived();
+    	public void onErrorAckReceived( String received  ,  String expected);
+    	
+    	public void onOutOfMemory();
+    	
     }
 }

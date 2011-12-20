@@ -10,10 +10,9 @@ import gnu.io.UnsupportedCommOperationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.TooManyListenersException;
+
 
 import com.doublecheck.bstworkbench.StringUtils;
 import com.doublecheck.bstworkbench.io.MicrocontrollerManager;
@@ -22,11 +21,19 @@ public class SerialManager implements MicrocontrollerManager {
 
 	private State state;
 	private enum State {
-		RUNNING, PAUSED, TDO, TDI, TDO_TDI, DEBUG;
+		RUNNING, PAUSED, TDO, TDI,  DEBUG, UPLOADING, READING_SIZE , ERROR ;
 	};
 	
     private class SerialInputListener implements Runnable,
             SerialPortEventListener {
+    	
+    	private int numberBytesTdi;
+    	private int numberBytesTdo;
+    	private byte [] tdi;
+    	private byte [] tdo;
+    	private byte [] tdoError;
+    	private boolean hadError = false;
+    	
         private boolean stop = false;
 
         private SerialInputListener() throws TooManyListenersException {
@@ -69,7 +76,74 @@ public class SerialManager implements MicrocontrollerManager {
                         }
                         Thread.sleep(100);
                     }
-                    String input = new String(readBuffer);
+                    for ( int i = 0 ; i < numBytes ; ++i )
+                    {
+                    	switch( state ){
+                        	case PAUSED: break;
+                        	case RUNNING:{
+                        		if ( readBuffer[i] == 'a' )
+                        			listeners.onAckReceived();
+                        		else if ( readBuffer[i] == 's' )
+                        			state = State.READING_SIZE;
+                        		else if ( readBuffer[i] == 't' )
+                        			state = State.TDI;
+                        		else if ( readBuffer[i] == 'f' )
+                        			state = State.TDO;
+                        		else if ( readBuffer[i] == 'e' )
+                        			state = State.ERROR;
+                        		break;
+                        	}
+                        	case UPLOADING:{
+                        		if ( readBuffer[i] == 'o' )
+                        			listeners.onOutOfMemory();
+                        		break;
+                        	}
+                        	case DEBUG:System.out.print(StringUtils.getHexString(readBuffer[i]));break;
+                        	case READING_SIZE: {
+                        		numberBytesTdo = numberBytesTdi = readBuffer[i];
+                        		tdi = new byte[numberBytesTdi];
+                        		tdo = new byte[numberBytesTdo];
+                        		tdoError = new byte[numberBytesTdo];
+                        		state = State.RUNNING; break;
+                        	}
+                        	case TDI:{
+                        		tdi[tdi.length-numberBytesTdi] = readBuffer[i];
+                        		--numberBytesTdi;
+                        		if ( numberBytesTdi == 0 )
+                        		{
+                        			listeners.onTDOReceived(StringUtils.getHexString(tdi));
+                        		}
+                        		state = State.RUNNING;
+                        		break;
+                        	}
+                        	case TDO:{
+                        		tdo[tdo.length-numberBytesTdo] = readBuffer[i];
+                        		tdoError[tdoError.length-numberBytesTdo] = readBuffer[i];
+                        		--numberBytesTdo;
+                        		if ( numberBytesTdo == 0 && !hadError)
+                        		{
+                        			listeners.onTDOReceived(StringUtils.getHexString(tdo));
+                        		}
+                        		state = State.RUNNING;
+                        		break;
+                        	}
+                        	case ERROR:{
+                        		tdoError[tdoError.length-numberBytesTdo-1] = readBuffer[i];
+                        		hadError = true;
+                        		if ( numberBytesTdo == 0 )
+                        		{
+                        			hadError = false;
+                        			listeners.onErrorAckReceived(StringUtils.getHexString(tdoError),
+                        										 StringUtils.getHexString(tdo));
+                        		}
+                        		state = State.RUNNING;
+                        		break;
+                        	}
+                        		
+                        	
+                        }
+                    }
+                    /*String input = new String(readBuffer);
                     if ( state == State.RUNNING )
                     {
                     	int pos = 0, readBufferPos  = 0;
@@ -92,7 +166,7 @@ public class SerialManager implements MicrocontrollerManager {
 
                     	}
                     	else	
-                    	System.out.println(input);
+                    	System.out.println(input);*/
                 } catch (final IOException e) {
                     e.printStackTrace();
                 } catch (Exception e) {
@@ -176,6 +250,7 @@ public class SerialManager implements MicrocontrollerManager {
     public void finishProgram() {
         if (!connected)
             return;
+        state = State.PAUSED;
         try {
             outputStream.write('f');
             outputStream.flush();
@@ -186,12 +261,13 @@ public class SerialManager implements MicrocontrollerManager {
     }
 
     @Override
-    public void initProgram() {
+    public void initProgramming() {
         if (!connected)
             return;
+        state = State.UPLOADING;
         try {
             outputStream.write('p');
-            outputStream.close();
+            outputStream.flush();
         } catch (final IOException e) {
             e.printStackTrace();
             disconnect();
@@ -215,6 +291,7 @@ public class SerialManager implements MicrocontrollerManager {
     public void write(final byte b) {
         if (!connected)
             return;
+        state = State.UPLOADING;
         try {
             outputStream.write(b);
             outputStream.flush();
@@ -228,6 +305,7 @@ public class SerialManager implements MicrocontrollerManager {
     public void write(final byte[] b) {
         if (!connected)
             return;
+        state = State.UPLOADING;
         try {
             outputStream.write(b);
             outputStream.flush();
@@ -287,16 +365,18 @@ public class SerialManager implements MicrocontrollerManager {
         }
     }
 
-    List<AcknowledgementListener> listeners = new ArrayList<AcknowledgementListener>();
+    AcknowledgementListener listeners = null;
     
 	public void addAcknowledgementListener(AcknowledgementListener listener) {
-		if ( !listeners.contains(listener) )
+		if ( listeners == null )
 		{
-			listeners.add(listener);
+			listeners = listener;
 		}
+		else 
+			throw new RuntimeException("Too many listeners!! :P");
 	}
 
 	public void removeAcknowledgementListener(AcknowledgementListener listener) {
-		listeners.remove(listener);
+		listeners = null;
 	}
 }

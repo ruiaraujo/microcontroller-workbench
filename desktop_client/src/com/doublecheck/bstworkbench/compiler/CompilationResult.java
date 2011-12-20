@@ -39,8 +39,8 @@ public class CompilationResult {
     	compiledOutput.add(0,ins.toFile());
     }
     
-    public Set<Integer> validLines(){
-    	return instructions.keySet();
+    public List<Integer> validLines(){
+    	return new ArrayList<Integer>(instructions.keySet());
     }
     
     public List<byte[]> getOutputFile(){
