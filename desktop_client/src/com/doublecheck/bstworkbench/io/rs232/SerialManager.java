@@ -30,8 +30,8 @@ public class SerialManager implements MicrocontrollerManager {
     	private int numberBytesTdi;
     	private int numberBytesTdo;
     	private byte [] tdi;
-    	private byte [] tdo;
-    	private byte [] tdoError;
+    	private byte [] tdoExpected;
+    	private byte [] tdoRead;
     	private boolean hadError = false;
     	private boolean doNotWriteOnError = false;
         private boolean stop = false;
@@ -107,8 +107,8 @@ public class SerialManager implements MicrocontrollerManager {
                         	case READING_SIZE: {
                         		numberBytesTdo = numberBytesTdi = readBuffer[i];
                         		tdi = new byte[numberBytesTdi];
-                        		tdo = new byte[numberBytesTdo];
-                        		tdoError = new byte[numberBytesTdo];
+                        		tdoExpected = new byte[numberBytesTdo];
+                        		tdoRead = new byte[numberBytesTdo];
                         		state = State.RUNNING; break;
                         	}
                         	case TDI:{
@@ -122,27 +122,27 @@ public class SerialManager implements MicrocontrollerManager {
                         		break;
                         	}
                         	case TDO:{
-                        		tdo[numberBytesTdo-1] = readBuffer[i];
+                        		tdoExpected[numberBytesTdo-1] = readBuffer[i];
                         		--numberBytesTdo;
                         		if ( numberBytesTdo == 0)
                         		{
                         			if ( hadError )
                         			{
-                        				listeners.onErrorAckReceived(StringUtils.getHexString(tdoError),
-       										 StringUtils.getHexString(tdo));
+                        				listeners.onErrorAckReceived(StringUtils.getHexString(tdoRead),
+       										 StringUtils.getHexString(tdoExpected));
                         				hadError = false;
                                 		state = State.RUNNING;
                         				return;
                         			}
                         			else
-                        				listeners.onTDOReceived(StringUtils.getHexString(tdo));
+                        				listeners.onTDOReceived(StringUtils.getHexString(tdoRead));
                         			
                         		}
                         		state = State.RUNNING;
                         		break;
                         	}
                         	case TDO_READ:{
-                        		tdoError[numberBytesTdo-1] = readBuffer[i];
+                        		tdoRead[numberBytesTdo-1] = readBuffer[i];
                         		state = State.RUNNING;
                         		break;
                         	}
