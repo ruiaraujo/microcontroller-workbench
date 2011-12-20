@@ -53,8 +53,8 @@ public abstract class Command {
         tok = tok.getNextToken();
         if (  tok.type  == Token.WHITESPACE )
             tok = tok.getNextToken();
-      try{
-        ret = Long.parseLong(tok.getLexeme(),16);
+        try{
+        	ret = Long.parseLong(tok.getLexeme(),16);
 	    } 
 	    catch ( NumberFormatException e ) 
 	    {
