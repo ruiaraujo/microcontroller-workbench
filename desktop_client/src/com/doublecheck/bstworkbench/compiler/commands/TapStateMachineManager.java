@@ -45,5 +45,10 @@ public class TapStateMachineManager {
     	selectNewTap(tapNumber);
     	return registeredTapControllers.get(currentTap);
     }
+    
+    public void clear(){
+    	currentTap = null;
+    	registeredTapControllers.clear();
+    }
    
 }
