@@ -9,26 +9,19 @@ import com.doublecheck.bstworkbench.compiler.Instruction;
 
 public class TapStateMachine {
 
-    /**
-     * SingletonHolder is loaded on the first execution of
-     * Singleton.getInstance() or the first access to SingletonHolder.INSTANCE,
-     * not before.
-     */
-    private static class TapStateMachineHolder {
-        public static final TapStateMachine instance = new TapStateMachine();
-    }
-
-    /**
-     * @return
-     */
-    public static TapStateMachine getInstance() {
-        return TapStateMachineHolder.instance;
-    }
-
     private Node currentNode;
-    public final static Map<String, Node> possibleStates = new HashMap<String, Node>();
+    private final static Map<String, Node> possibleStates = new HashMap<String, Node>();
 
-    private TapStateMachine() {
+    public TapStateMachine() {
+        currentNode = null;// we assume that the state machine starts in the
+                            // reset state
+        initStates();
+    }
+
+    
+    private static void initStates(){
+    	if ( possibleStates.size() !=  0 )
+    		return;
         final Node reset = new Node("reset");
         final Node idle = new Node("idle");
         final Node select_dr = new Node("select-dr");
@@ -45,8 +38,6 @@ public class TapStateMachine {
         final Node pause_ir = new Node("pause-ir");
         final Node exit2_ir = new Node("exit2-ir");
         final Node update_ir = new Node("update-ir");
-        currentNode = reset;// we assume that the state machine starts in the
-                            // reset state
         reset.tms0 = idle;
         reset.tms1 = null;
         idle.tms0 = null;
@@ -103,7 +94,6 @@ public class TapStateMachine {
         possibleStates.put(exit2_ir.name, exit2_ir);
         possibleStates.put(update_ir.name, update_ir);
     }
-
     public List<Instruction> moveToState(final String state) {
         final Node dest = possibleStates.get(state);
         if (dest == null)
@@ -111,9 +101,21 @@ public class TapStateMachine {
         if (currentNode == dest)
             return new ArrayList<Instruction>();// return empty list
         cleanNodeState();
+        boolean needsInitialReset = false;
+        if ( currentNode == null )
+        {
+        	currentNode = possibleStates.get("reset");
+        	needsInitialReset = true;
+        }
         List<Integer> list = new ArrayList<Integer>();
         if (findNode(currentNode, dest, list)) {
             currentNode = dest;
+            if ( needsInitialReset )
+            {
+            	//adding initial reset to the instruction list to be optimized
+            	for ( int i = 0; i < 5 ; ++i )
+            		list.add(0, 1);
+            }
             return getImprovedInstructions(list);
         }
         return null;
@@ -171,9 +173,6 @@ public class TapStateMachine {
     }
 
     public static boolean isStateAllowed(final String state) {
-        if (possibleStates.size() == 0) {
-            TapStateMachine.getInstance();
-        }
         if (state == null)
             return false;
         final Node dest = possibleStates.get(state);
@@ -183,22 +182,11 @@ public class TapStateMachine {
     }
 
     public static List<String> getAllowedStates() {
-        if (possibleStates.size() == 0) {
-            TapStateMachine.getInstance();
-        }
         List<String> ret = new ArrayList<String>();
         ret.addAll(possibleStates.keySet());
         return ret;
     }
-    
-    private final static List<Instruction> resetIns = new ArrayList<Instruction>();
-    
-    public static List<Instruction> getResetInstructions() {
-    	if ( resetIns.size() == 0 )
-    		resetIns.add(new Instruction(Command.TMS1, (byte)1, 5L));
-    	return resetIns;
-    }
-    
+        
     public void reset(){
     	currentNode = possibleStates.get("reset");
     	cleanNodeState();

@@ -23,9 +23,6 @@ public class Compiler {
     
     public void parse(RSyntaxDocument rSyntaxDocument){
         int size = rSyntaxDocument.getLineCount();
-        TapStateMachine state = TapStateMachine.getInstance();
-        state.reset();
-        result.addInstructions(0,TapStateMachine.getResetInstructions()); 
         for ( int i = 0 ; i < size ; ++i  )
         {
             Token tok = rSyntaxDocument.getTokenListForLine(i);

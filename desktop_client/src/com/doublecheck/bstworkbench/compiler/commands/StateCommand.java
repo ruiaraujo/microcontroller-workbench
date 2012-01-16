@@ -57,7 +57,7 @@ public class StateCommand extends Command {
 
     @Override
     public List<Instruction> getInstructions() {
-        TapStateMachine stateMachine = TapStateMachine.getInstance();
+        TapStateMachine stateMachine = TapStateMachineManager.getInstance().getCurrentTapStateMachine();
         return stateMachine.moveToState(state);
     }
 

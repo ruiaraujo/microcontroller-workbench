@@ -67,7 +67,7 @@ public class TmsCommand extends Command {
     @Override
     public List<Instruction> getInstructions() {
         List<Instruction> ret = new ArrayList<Instruction>(1);
-        TapStateMachine stateMachine = TapStateMachine.getInstance();
+        TapStateMachine stateMachine = TapStateMachineManager.getInstance().getCurrentTapStateMachine();
         if ( tmsState == 0 )
         {
             stateMachine.updateState(TMS_0);

@@ -34,7 +34,7 @@ public class SirCommand extends SdrCommand {
 
     @Override
     public List<Instruction> getInstructions() {
-        TapStateMachine stateMachine = TapStateMachine.getInstance();
+        TapStateMachine stateMachine = TapStateMachineManager.getInstance().getCurrentTapStateMachine();
         List<Instruction> ret = new ArrayList<Instruction>();
         ret.addAll(stateMachine.moveToState("capture-ir"));
         ret.addAll(stateMachine.moveToState("shift-ir"));

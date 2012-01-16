@@ -63,10 +63,8 @@ public class SeltapCommand extends Command {
     @Override
     public List<Instruction> getInstructions() {
         List<Instruction> ret = new ArrayList<Instruction>(1);
-        TapStateMachine machine = TapStateMachine.getInstance();
-        machine.reset();
+        TapStateMachineManager.getInstance().selectNewTap((long)tapNumber);
         ret.add(new Instruction(Command.SELTAP, (byte)1, (long)tapNumber));
-        ret.addAll(TapStateMachine.getResetInstructions());
         return ret;
     }
 

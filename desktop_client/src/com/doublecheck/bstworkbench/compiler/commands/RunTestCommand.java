@@ -61,7 +61,7 @@ public class RunTestCommand extends Command {
     @Override
     public List<Instruction> getInstructions() {
         List<Instruction> ret = new ArrayList<Instruction>();
-        TapStateMachine stateMachine = TapStateMachine.getInstance();
+        TapStateMachine stateMachine = TapStateMachineManager.getInstance().getCurrentTapStateMachine();
         ret.addAll(stateMachine.moveToState("idle"));
         ret.add(new Instruction(Command.RUNTEST, getNumberBytes(clockNumber), clockNumber));
         return ret;
